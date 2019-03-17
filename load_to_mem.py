@@ -7,6 +7,7 @@ Use PEP8 for editing this file
 import numpy as np
 import os
 import re
+import math
 
 """
 Files look like this:
@@ -68,9 +69,9 @@ def parse_file(file_name: str) -> []:
         cov2split = lines[i + n_stations*3 + 1].split()
         cov3split = lines[i + n_stations*3 + 2].split()
 
-        xy = float(cov1split[2])
-        xz = float(cov2split[2])
-        yz = float(cov3split[2])
+        xy = float(cov1split[2]) * math.sqrt(xx*yy)
+        xz = float(cov2split[2]) * math.sqrt(xx*zz)
+        yz = float(cov3split[2]) * math.sqrt(yy*zz)
 
         pos = np.array([x, y, z])
         covariance = np.array([[xx, xy, xz],
@@ -95,7 +96,6 @@ def save_tseries(collection, output_folder):
 
         for i in range(0, 3):
             item.mat[:, i].tofile(file)
-            
 
     file.close()
 
