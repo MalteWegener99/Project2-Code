@@ -5,6 +5,8 @@ Use PEP8 for editing this file
 '''
 
 import numpy as np
+import os
+import re
 
 """
 Files look like this:
@@ -18,7 +20,7 @@ if a line contains a '+-' its always a value
 class Sample:
     '''
     Container for saving a sample in time
-    time: uint: dayE2 + Year(last 2 digits)
+    time: uint: Year(last 2 digits)E3 + day
     '''
     def __init__(self, name, time, xyz, mat):
         self.name = name
@@ -36,11 +38,12 @@ def parse_file(file_name: str) -> []:
     Loads a file and returns a list of Sample
     '''
 
-    time = int(file_name[-3:-1]) + int(file_name[-7:-4]) * 100
+    time = int(file_name[-3:-1]) * 1000 + int(file_name[-7:-4])
 
     collector = []
     file = open(file_name)
     lines = file.readlines()
+    file.close()
 
     # remove header
     lines = lines[1:]
@@ -78,7 +81,56 @@ def parse_file(file_name: str) -> []:
 
     return collector
 
-parsed = parse_file("/home/malte/Desktop/project/data/PZITRF08361.06X")
-for parse in parsed:
-    print(parse)
 
+def save_tseries(collection, output_folder):
+    #collection = collection.sort(key=lambda x: x.time)
+    print(type(collection))
+    print(type(collection[0]))
+    name = collection[0].name
+    file = open(output_folder + "/" + name + ".tseries", 'wb')
+    for item in collection:
+        file.write(item.time.to_bytes(8, byteorder='little'))
+        for i in range(0, 3):
+            item.xyz[i].tofile(file)
+
+        for i in range(0, 3):
+            item.mat[:, i].tofile(file)
+            
+
+    file.close()
+
+
+def load_folder(path) -> list:
+    files = list(filter(lambda x: re.match(r'PZITRF08[0-9]{3}\.[0-9]{2}X$', x),
+                   os.listdir(path)))
+
+    collection = []
+    dp = 1. / len(files)
+    p = 0.
+    for file in files:
+        collection += (parse_file(path + '/' + file))
+        p += dp
+        print("{0:.2%} done".format(p))
+
+    return collection
+
+
+def split_into_series(collection) -> dict:
+    stations = set()
+    series = dict()
+    for item in collection:
+        stations.add(item.name)
+    
+    for station in stations:
+        series[station] = list(filter(lambda x: x.name == station,
+                                      collection))
+    print("done")
+    return series
+
+
+time_series = split_into_series(load_folder(r'/home/malte/Desktop/project/data'))
+
+for key in time_series:
+    print(key)
+    print(type(time_series[key]))
+    save_tseries(time_series[key], r'/home/malte/Desktop/project/t_series')
