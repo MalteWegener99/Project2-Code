@@ -1,7 +1,7 @@
 class Sample:
     '''
     Container for saving a sample in time
-    time: uint: Year(last 2 digits)E3 + day
+    time: uint: YearE3 + day
     '''
     def __init__(self, name, time, pos, mat):
         self.name = name

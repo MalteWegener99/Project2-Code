@@ -25,6 +25,10 @@ def parse_file(file_name: str) -> []:
     '''
 
     time = int(file_name[-3:-1]) * 1000 + int(file_name[-7:-4])
+    if time > 20000:
+        time += 1900000
+    else:
+        time += 2000000
 
     collector = []
     file = open(file_name)
