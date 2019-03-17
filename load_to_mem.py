@@ -8,6 +8,7 @@ import numpy as np
 import os
 import re
 import math
+from Sample import Sample
 
 """
 Files look like this:
@@ -16,22 +17,6 @@ ID STATION STA [X,Y,Z] value +- devi
 ID1 ID2 COV
 if a line contains a '+-' its always a value
 """
-
-
-class Sample:
-    '''
-    Container for saving a sample in time
-    time: uint: Year(last 2 digits)E3 + day
-    '''
-    def __init__(self, name, time, xyz, mat):
-        self.name = name
-        self.time = time
-        self.xyz = xyz
-        self.mat = mat
-
-    def __str__(self):
-        return "{} was on position {} on {} \r\n with deviations: \r\n{}"\
-                .format(self.name, self.xyz, self.time, self.mat)
 
 
 def parse_file(file_name: str) -> []:
@@ -83,7 +68,7 @@ def parse_file(file_name: str) -> []:
     return collector
 
 
-def save_tseries(collection, output_folder):
+def save_tseries_bin(collection, output_folder):
     #collection = collection.sort(key=lambda x: x.time)
     print(type(collection))
     print(type(collection[0]))
@@ -92,7 +77,7 @@ def save_tseries(collection, output_folder):
     for item in collection:
         file.write(item.time.to_bytes(8, byteorder='little'))
         for i in range(0, 3):
-            item.xyz[i].tofile(file)
+            item.pos[i].tofile(file)
 
         for i in range(0, 3):
             item.mat[:, i].tofile(file)
@@ -133,4 +118,4 @@ time_series = split_into_series(load_folder(r'/home/malte/Desktop/project/data')
 for key in time_series:
     print(key)
     print(type(time_series[key]))
-    save_tseries(time_series[key], r'/home/malte/Desktop/project/t_series')
+    save_tseries_bin(time_series[key], r'/home/malte/Desktop/project/t_series')
