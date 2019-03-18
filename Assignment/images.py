@@ -38,7 +38,7 @@ for j in range(0, 50):
         except:
             i -= 1
         if i == 120:
-            exit()
+            break
 
     shutil.make_archive('pics'+str(j), 'zip')
     print(j)
