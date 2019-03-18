@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <iostream>
 
 // Cosntants for WGS84
 const double f = 1 / 298.257223563;
@@ -31,13 +32,15 @@ typedef std::vector<Sample> t_collection;
 
 t_collection load_from_binary_file(char* path){
     std::ifstream file;
-    file.open(path, std::ios::in | std::ios::binary);
+    file.open(path, std::ios::binary);
 
     t_collection Collector;
     Collector.reserve(6000);
-    int i = 0;
-    while(!file.eof()){
-        i++;
+    char num_bin[8] = {'\0','\0','\0','\0','\0','\0','\0','\0'};
+    file.read(num_bin, 8);
+    int64_t num = *(int64_t*)num_bin;
+    std::cout << num << std::endl;
+    for(int i = 0; i < num; i++){
         //time
         char time_bin[8];
         file.read(time_bin, 8);
@@ -56,19 +59,18 @@ t_collection load_from_binary_file(char* path){
             smp.mat[i] = numbers[i+2];
         }
         Collector.push_back(smp);
-        printf("%d\n", i);
     }
     file.close();
-
     return Collector;
 }
 
 void save_to_binary_file(t_collection Collection, char* path){
     std::ofstream file;
     file.open(path, std::ios::out | std::ios::binary | std::ios::trunc);
-
+    int64_t size = Collection.size();
+    file.write((char*)&size, 8);
     for(int i = 0; i < Collection.size(); i++){
-        file.write((char*)Collection[i].time, 8*13);
+        file.write((char*)&(Collection[i].time), 13*8);
     }
     file.close();
 }

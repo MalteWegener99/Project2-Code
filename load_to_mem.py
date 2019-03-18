@@ -7,6 +7,7 @@ Use PEP8 for editing this file
 import numpy as np
 import os
 import re
+import sys
 import math
 from Sample import Sample
 
@@ -78,6 +79,7 @@ def save_tseries_bin(collection, output_folder):
     print(type(collection[0]))
     name = collection[0].name
     file = open(output_folder + "/" + name + ".tseries", 'wb')
+    file.write(len(collection).to_bytes(8, byteorder='little'))
     for item in collection:
         file.write(item.time.to_bytes(8, byteorder='little'))
         for i in range(0, 3):
@@ -117,9 +119,13 @@ def split_into_series(collection) -> dict:
     return series
 
 
-time_series = split_into_series(load_folder(r'/home/malte/Desktop/project/data'))
+def convert_folder(path, out):
+    time_series = split_into_series(load_folder(path))
 
-for key in time_series:
-    print(key)
-    print(type(time_series[key]))
-    save_tseries_bin(time_series[key], r'/home/malte/Desktop/project/t_series')
+    for key in time_series:
+        print(key)
+        print(type(time_series[key]))
+        save_tseries_bin(time_series[key], out)
+
+if __name__ == "__main__":
+    convert_folder(sys.argv[1], sys.argv[2])

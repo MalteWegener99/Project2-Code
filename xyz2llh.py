@@ -19,6 +19,7 @@ def save_tseries_bin_llh(collection, output_folder):
     print(type(collection[0]))
     name = collection[0].name
     file = open(output_folder + "/" + name + ".tseries_llh", 'wb')
+    file.write(len(collection).to_bytes(8, byteorder='little'))
     for item in collection:
         file.write(item.time.to_bytes(8, byteorder='little'))
         for i in range(0, 3):
@@ -56,6 +57,9 @@ def parse_binary(path) -> list:
     collection = []
 
     with open(path, 'rb') as file:
+        n = file.read(8)
+        n = struct.unpack('<q', n)[0]
+
         while True:
             time = file.read(8)
             time = struct.unpack('<q', time)[0]
@@ -75,6 +79,8 @@ def parse_binary(path) -> list:
             pos_f = file.tell()
             collection.append(Sample(name, time, pos, mat))
             if not file.read(1):
+                print(n)
+                print(len(collection))
                 return collection
             else:
                 file.seek(pos_f)
