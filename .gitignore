@@ -5,3 +5,5 @@ __pycache__/xyz2llh.cpython-36.pyc
 *.bmp
 Assignment/pics/*
 Assignment/pics*.zip
+Assignment/bmps/conv.py
+Assignment/bmps/pngs/*
