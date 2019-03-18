@@ -1,2 +1,5 @@
 __pycache__/Sample.cpython-36.pyc
 __pycache__/xyz2llh.cpython-36.pyc
+*.jpg
+*.JPG
+*.bmp
