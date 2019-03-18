@@ -12,6 +12,7 @@ f = 1 / 298.257223563
 e_2 = 2 * f - f**2
 a = 6378137.  # SMA
 
+
 def save_tseries_bin_llh(collection, output_folder):
     #collection = collection.sort(key=lambda x: x.time)
     print(type(collection))
@@ -27,6 +28,7 @@ def save_tseries_bin_llh(collection, output_folder):
             item.mat[:, i].tofile(file)
 
     file.close()
+
 
 # https://gssc.esa.int/navipedia/index.php/Ellipsoidal_and_Cartesian_Coordinates_Conversion 
 def xyz2llh(pos):
