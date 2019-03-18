@@ -4,3 +4,4 @@ __pycache__/xyz2llh.cpython-36.pyc
 *.JPG
 *.bmp
 Assignment/pics/*
+Assignment/pics*.zip

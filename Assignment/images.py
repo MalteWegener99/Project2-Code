@@ -24,7 +24,7 @@ r = requests.get("https://api.qwant.com/api/search/images",
 response = r.json().get('data').get('result').get('items')
 print(response)
 urls = [r.get('media') for r in response]
-
+print(urls)
 for j in range(0, 50):
     shuffle(urls)
 
@@ -33,12 +33,14 @@ for j in range(0, 50):
         i += 1
         name = "A" + str(i)
         print(i)
-        try:
-            urllib.request.urlretrieve(url, "pics/" + name+url[-4:])
-        except:
-            i -= 1
+        if re.match(r'.*\.jpg$', url) or re.match(r'.*\.JPG$', url):
+            print(url[-4:])
+            try:
+                urllib.request.urlretrieve(url, "pics/" + name+url[-4:])
+            except:
+                i -= 1
         if i == 120:
             break
 
-    shutil.make_archive('pics'+str(j), 'zip')
+    shutil.make_archive('pics'+str(j), 'zip', 'pics')
     print(j)
