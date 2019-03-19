@@ -3,6 +3,7 @@
         "iosfwd": "cpp",
         "*.tcc": "cpp",
         "chrono": "cpp",
-        "cstring": "cpp"
+        "cstring": "cpp",
+        "thread": "cpp"
     }
 }
