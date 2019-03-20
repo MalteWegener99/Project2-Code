@@ -51,9 +51,9 @@ def parse_file(file_name: str) -> []:
         x = float(xsplit[val])
         y = float(ysplit[val])
         z = float(zsplit[val])
-        xx = float(xsplit[dev])
-        yy = float(ysplit[dev])
-        zz = float(zsplit[dev])
+        xx = float(xsplit[dev])**2
+        yy = float(ysplit[dev])**2
+        zz = float(zsplit[dev])**2
 
         cov1split = lines[i + n_stations*3].split()
         cov2split = lines[i + n_stations*3 + 1].split()

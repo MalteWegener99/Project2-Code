@@ -56,7 +56,7 @@ typedef std::vector<Sample> t_collection;
 t_collection load_from_binary_file(const char* path, char* name){
     std::ifstream file;
     file.open(path, std::ios::binary);
-    mempcpy(name, (path + (strlen(path)-12)), 4);
+    memcpy(name, (path + (strlen(path)-12)), 4);
     name[4] = '\0';
 
     t_collection Collector;
