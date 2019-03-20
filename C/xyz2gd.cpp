@@ -1,23 +1,20 @@
-#include <stdio.h>
-#include <math.h>
-#include <stdint.h>
 #include <vector>
-#include <string>
 #include <fstream>
-#include <iostream>
 #include <cstring>
+#include <thread>
+#include <string>
+#include <iostream>
+#include <math.h>
 #include <chrono>
 
-// Cosntants for WGS84
+double* xyz2llh(double*);
+
 const double f = 1 / 298.257223563;
 const double e_2 = 2.0 * f - f*f;
 const double a = 6378137.0;  //SMA
 
-double* xyz2llh(double*);
-
 class Sample{
 public:
-    char name[5];
     int64_t time;
     double pos[3];
     double mat[9];
@@ -31,12 +28,34 @@ void Sample::convert(){
     }
 }
 
+double* xyz2llh(double* pos){
+    //[phi, lambda, h]
+    double x = pos[0];
+    double y = pos[1];
+    double z = pos[2];
+    double lam = atan(y/x);
+
+    double p = sqrt(x*x + y*y);
+
+    //inital calculation
+    double phi = atan(z/((1-e_2) * p));
+    double h = 0.;
+
+    for(unsigned int i = 0; i < 10; i++){
+        double N = a/(sqrt(1-e_2*pow(sin(phi),2)));
+        h = p/(cos(phi)) - N;
+        double denom = 1-e_2*N/(N+h);
+        phi = atan(z/(denom*p));
+    }
+    double* arr = new double[3]{phi, lam, h};
+    return arr;
+}
+
 typedef std::vector<Sample> t_collection;
 
-t_collection load_from_binary_file(char* path){
+t_collection load_from_binary_file(const char* path, char* name){
     std::ifstream file;
     file.open(path, std::ios::binary);
-    char name[5];
     mempcpy(name, (path + (strlen(path)-12)), 4);
     name[4] = '\0';
 
@@ -63,7 +82,6 @@ t_collection load_from_binary_file(char* path){
         for(int i = 0; i < 9; i++){
             smp.mat[i] = numbers[i+2];
         }
-        mempcpy(smp.name, name, 5);
         Collector.push_back(smp);
     }
     file.close();
@@ -81,45 +99,32 @@ void save_to_binary_file(t_collection Collection, char* path){
     file.close();
 }
 
-
-double* xyz2llh(double* pos){
-    //[phi, lambda, h]
-    double x = pos[0];
-    double y = pos[1];
-    double z = pos[2];
-    double lam = atan(y/x);
-
-    double p = sqrt(x*x + y*y);
-
-    //inital calculation
-    double phi = atan(z/((1-e_2) * p));
-    double h = 0.;
-
-    for(unsigned int i = 0; i < 10; i++){
-        double N = a/(sqrt(1-e_2*pow(sin(phi),2)));
-        h = p/(cos(phi)) - N;
-        double denom = 1-e_2*N/(N+h);
-        phi = atan(z/(denom*p));
-    }
-    double* arr = new double[3]{phi, lam, h};
-    return arr;
-}
-
-int main(int argc, char* argv[]){
-    if(argc < 3){
-        printf("give at least 2 Arguments");
-        return 1;
-    }
-    else if(argc > 3){
-        printf("too many arguments");
-        return 1;
-    }
-    auto start = std::chrono::high_resolution_clock::now();
-    t_collection Collection = load_from_binary_file(argv[1]);
+void dispatch(const char* infile, char* outfolder){
+    char outfile[1024];
+    memset(outfile, '\0', 1024);
+    strcpy(outfile, outfolder);
+    strncat(outfile, "/", 1);
+    char station_name[5];
+    t_collection Collection = load_from_binary_file(infile, station_name);
+    strncat(outfile, station_name, 4);
+    strncat(outfile, ".tseries.neu", 12);
     for(int i = 0; i < Collection.size(); i++){
         Collection[i].convert();
     }
-    auto elapsed = std::chrono::high_resolution_clock::now() - start;
-    std::cout << elapsed.count() / 1e6 << std::endl;
-    save_to_binary_file(Collection, argv[2]);
+    save_to_binary_file(Collection, outfile);
+}
+
+int main(int argc, char* argv[]){
+    auto start = std::chrono::high_resolution_clock::now();
+    //argv[1] is input file with all files
+    //argv[2] is output folder
+    //find all files in input
+    std::ifstream file(argv[1]);
+
+    for( std::string line; getline( file, line ); )
+    {
+        auto file_to_conv = line.c_str();
+        dispatch(file_to_conv, argv[2]);        
+    }
+    std::cout << (std::chrono::high_resolution_clock::now()-start).count()/1000000. << std::endl;
 }

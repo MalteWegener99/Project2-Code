@@ -114,7 +114,9 @@ def main(argv):
     if argv[0] == '-f' or argv[0] == '--file':
         convert_file(argv[1], argv[2])
     else:
+        start = time.time()
         convert_folder(argv[0], argv[1])
+        print(time.time() - start)
 
 
 if __name__ == "__main__":
