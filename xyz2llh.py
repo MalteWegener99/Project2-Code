@@ -2,6 +2,7 @@ import sys
 import re
 import os
 import math
+from math import sin,cos
 import numpy as np
 import time
 import struct
@@ -86,8 +87,12 @@ def transform_list(collection) -> list:
     collector = []
     for item in collection:
         new_pos = xyz2llh(item.pos)
-        error = xyz2llh(item.pos + np.matmul(item.mat, item.pos)) - new_pos;
-        
+        phi, lam, h = new_pos
+        mat = np.array([[-1*sin(lam), -1*sin(phi)*cos(lam), cos(phi)*cos(lam)],
+                        [cos(lam), -1*sin(phi)*sin(lam), cos(phi)*sin(lam)],
+                        [0, cos(phi), sin(phi)]])
+        error = np.matmul(np.matmul(mat.T, item.mat), mat)
+        error = np.matmul(error, new_pos)
         collector.append(Sample_conv(item.name, item.time, new_pos, error))
     return collector
 

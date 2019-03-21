@@ -4,7 +4,8 @@ import numpy as np
 import sys
 import struct
 import datetime
-from  math import cos, sin
+from math import cos, sin
+import math
 
 def parse_binary_llh(path):
     name = path.split('/')[-1][0:4]
@@ -34,32 +35,37 @@ def parse_binary_llh(path):
 
         return collection
 
+
 def graph_series(series):
     series = sorted(series, key=lambda x: x.time)
     mindate = series[0].time
     p0 = np.array(series[0].pos)
-    phi,lam,h = p0
-    mat = np.array([[-1*sin(phi)*cos(lam), -1*sin(phi)*sin(lam),cos(phi)],
-                    [-1*sin(lam),cos(lam),0],
-                    [-1*cos(phi)*cos(lam), -1*cos(phi)*sin(lam),-1*sin(phi)]])
+    phi, lam, h = p0
+    mat = np.array([[-1*sin(lam),cos(lam), 0.],
+                        [-1*cos(lam)*sin(phi), -1*sin(lam)*sin(phi), cos(phi)],
+                        [cos(lam)*cos(phi), sin(lam)*cos(phi), sin(phi)]]).T
 
     positions = []
+    errors = []
     times = []
     i = 0
     for elem in series:
         year = elem.time//1000
         days = elem.time - year*1000
         times.append(datetime.date.fromordinal(datetime.date(year, 1, 1).toordinal() + days - 1))
-        positions.append(np.matmul(mat,elem.pos-p0))
+        tmp = p0 - elem.pos
+        positions.append(np.matmul(mat, tmp))
         pos = np.zeros([3])
+        errors.append(elem.err)
 
 
-    positions = np.array(positions)
+    plotpos = np.array(positions)
+    ploterr = np.array(errors)
+    errors = np.array(errors)
     f, axarr = plt.subplots(3, sharex=True)
     f.suptitle('DAMn')
-    axarr[0].scatter(times, positions[:, 0], s=0.01)
-    axarr[1].scatter(times, positions[:, 1], s=0.01)
-    axarr[2].scatter(times, positions[:, 2], s=0.01)
+    for i in range(0,3):
+        axarr[i].errorbar(times, plotpos[:, i], yerr=errors[:,i], linewidth=0.5, fmt='o', markersize=0.1)
     plt.show()
 
 graph_series(parse_binary_llh(sys.argv[1]))
