@@ -2,7 +2,8 @@ import geoplotlib
 from graphing import parse_binary_llh
 import sys, os
 from math import degrees
-from geoplotlib.utils import read_csv
+from geoplotlib.colors import colorbrewer
+from geoplotlib.utils import epoch_to_str, BoundingBox, read_csv
 
 if __name__ == "__main__":
     path = sys.argv[1]
@@ -22,5 +23,6 @@ if __name__ == "__main__":
     
 data = read_csv('tmp.csv')
 print(type(data))
-geoplotlib.dot(data)
+geoplotlib.dot(data, 'r')
+geoplotlib.labels(data, 'name', color=[0,0,255,255], font_size=10, anchor_x='center')
 geoplotlib.show()
