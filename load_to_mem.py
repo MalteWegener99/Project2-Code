@@ -7,8 +7,10 @@ Use PEP8 for editing this file
 import numpy as np
 import os
 import re
+import sys
 import math
 from Sample import Sample
+import struct
 
 """
 Files look like this:
@@ -29,6 +31,7 @@ def parse_file(file_name: str) -> []:
         time += 1900000
     else:
         time += 2000000
+    print(time)
 
     collector = []
     file = open(file_name)
@@ -50,9 +53,9 @@ def parse_file(file_name: str) -> []:
         x = float(xsplit[val])
         y = float(ysplit[val])
         z = float(zsplit[val])
-        xx = float(xsplit[dev])
-        yy = float(ysplit[dev])
-        zz = float(zsplit[dev])
+        xx = float(xsplit[dev])**2
+        yy = float(ysplit[dev])**2
+        zz = float(zsplit[dev])**2
 
         cov1split = lines[i + n_stations*3].split()
         cov2split = lines[i + n_stations*3 + 1].split()
@@ -74,12 +77,11 @@ def parse_file(file_name: str) -> []:
 
 def save_tseries_bin(collection, output_folder):
     #collection = collection.sort(key=lambda x: x.time)
-    print(type(collection))
-    print(type(collection[0]))
     name = collection[0].name
     file = open(output_folder + "/" + name + ".tseries", 'wb')
+    file.write(len(collection).to_bytes(8, byteorder='little'))
     for item in collection:
-        file.write(item.time.to_bytes(8, byteorder='little'))
+        file.write(struct.pack('<q', item.time))
         for i in range(0, 3):
             item.pos[i].tofile(file)
 
@@ -117,9 +119,12 @@ def split_into_series(collection) -> dict:
     return series
 
 
-time_series = split_into_series(load_folder(r'/home/malte/Desktop/project/data'))
+def convert_folder(path, out):
+    time_series = split_into_series(load_folder(path))
 
-for key in time_series:
-    print(key)
-    print(type(time_series[key]))
-    save_tseries_bin(time_series[key], r'/home/malte/Desktop/project/t_series')
+    for key in time_series:
+        print(key)
+        save_tseries_bin(time_series[key], out)
+
+if __name__ == "__main__":
+    convert_folder(sys.argv[1], sys.argv[2])

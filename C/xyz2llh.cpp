@@ -4,6 +4,9 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <iostream>
+#include <cstring>
+#include <chrono>
 
 // Cosntants for WGS84
 const double f = 1 / 298.257223563;
@@ -14,6 +17,7 @@ double* xyz2llh(double*);
 
 class Sample{
 public:
+    char name[5];
     int64_t time;
     double pos[3];
     double mat[9];
@@ -31,13 +35,17 @@ typedef std::vector<Sample> t_collection;
 
 t_collection load_from_binary_file(char* path){
     std::ifstream file;
-    file.open(path, std::ios::in | std::ios::binary);
+    file.open(path, std::ios::binary);
+    char name[5];
+    mempcpy(name, (path + (strlen(path)-12)), 4);
+    name[4] = '\0';
 
     t_collection Collector;
-    Collector.reserve(6000);
-    int i = 0;
-    while(!file.eof()){
-        i++;
+    char num_bin[8] = {'\0','\0','\0','\0','\0','\0','\0','\0'};
+    file.read(num_bin, 8);
+    int64_t num = *(int64_t*)num_bin;
+    Collector.reserve(num);
+    for(int i = 0; i < num; i++){
         //time
         char time_bin[8];
         file.read(time_bin, 8);
@@ -55,20 +63,20 @@ t_collection load_from_binary_file(char* path){
         for(int i = 0; i < 9; i++){
             smp.mat[i] = numbers[i+2];
         }
+        mempcpy(smp.name, name, 5);
         Collector.push_back(smp);
-        printf("%d\n", i);
     }
     file.close();
-
     return Collector;
 }
 
 void save_to_binary_file(t_collection Collection, char* path){
     std::ofstream file;
     file.open(path, std::ios::out | std::ios::binary | std::ios::trunc);
-
+    int64_t size = Collection.size();
+    file.write((char*)&size, 8);
     for(int i = 0; i < Collection.size(); i++){
-        file.write((char*)Collection[i].time, 8*13);
+        file.write((char*)&(Collection[i].time), 13*8);
     }
     file.close();
 }
@@ -106,10 +114,12 @@ int main(int argc, char* argv[]){
         printf("too many arguments");
         return 1;
     }
+    auto start = std::chrono::high_resolution_clock::now();
     t_collection Collection = load_from_binary_file(argv[1]);
     for(int i = 0; i < Collection.size(); i++){
         Collection[i].convert();
     }
-    printf("%zu\n", Collection.size());
+    auto elapsed = std::chrono::high_resolution_clock::now() - start;
+    std::cout << elapsed.count() / 1e6 << std::endl;
     save_to_binary_file(Collection, argv[2]);
 }

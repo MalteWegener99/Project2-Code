@@ -2,10 +2,11 @@ import sys
 import re
 import os
 import math
+from math import sin,cos
 import numpy as np
 import time
 import struct
-from Sample import Sample
+from Sample import Sample, Sample_conv
 
 # WGS 84
 f = 1 / 298.257223563
@@ -15,17 +16,16 @@ a = 6378137.  # SMA
 
 def save_tseries_bin_llh(collection, output_folder):
     #collection = collection.sort(key=lambda x: x.time)
-    print(type(collection))
-    print(type(collection[0]))
     name = collection[0].name
-    file = open(output_folder + "/" + name + ".tseries_llh", 'wb')
+    file = open(output_folder + "/" + name + ".tseries.neu", 'wb')
+    file.write(struct.pack('<q', len(collection)))
     for item in collection:
-        file.write(item.time.to_bytes(8, byteorder='little'))
+        file.write(struct.pack('<q', item.time))
         for i in range(0, 3):
-            item.pos[i].tofile(file)
+            file.write(struct.pack('<d', item.pos[i]))
 
         for i in range(0, 3):
-            item.mat[:, i].tofile(file)
+            file.write(struct.pack('<d', item.err[i]))
 
     file.close()
 
@@ -56,6 +56,9 @@ def parse_binary(path) -> list:
     collection = []
 
     with open(path, 'rb') as file:
+        n = file.read(8)
+        n = struct.unpack('<q', n)[0]
+
         while True:
             time = file.read(8)
             time = struct.unpack('<q', time)[0]
@@ -81,11 +84,17 @@ def parse_binary(path) -> list:
 
 
 def transform_list(collection) -> list:
+    collector = []
     for item in collection:
         new_pos = xyz2llh(item.pos)
-        item.pos = new_pos
-    print(collection[0].pos)
-    return collection
+        phi, lam, h = new_pos
+        mat = np.array([[-1*sin(lam), -1*sin(phi)*cos(lam), cos(phi)*cos(lam)],
+                        [cos(lam), -1*sin(phi)*sin(lam), cos(phi)*sin(lam)],
+                        [0, cos(phi), sin(phi)]])
+        error = np.matmul(np.matmul(mat.T, item.mat), mat)
+        error = np.matmul(error, new_pos)
+        collector.append(Sample_conv(item.name, item.time, new_pos, error))
+    return collector
 
 
 def convert_file(file, output):
@@ -108,7 +117,9 @@ def main(argv):
     if argv[0] == '-f' or argv[0] == '--file':
         convert_file(argv[1], argv[2])
     else:
+        start = time.time()
         convert_folder(argv[0], argv[1])
+        print(time.time() - start)
 
 
 if __name__ == "__main__":
