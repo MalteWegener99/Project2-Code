@@ -10,6 +10,7 @@ import re
 import sys
 import math
 from Sample import Sample
+import struct
 
 """
 Files look like this:
@@ -30,6 +31,7 @@ def parse_file(file_name: str) -> []:
         time += 1900000
     else:
         time += 2000000
+    print(time)
 
     collector = []
     file = open(file_name)
@@ -75,13 +77,11 @@ def parse_file(file_name: str) -> []:
 
 def save_tseries_bin(collection, output_folder):
     #collection = collection.sort(key=lambda x: x.time)
-    print(type(collection))
-    print(type(collection[0]))
     name = collection[0].name
     file = open(output_folder + "/" + name + ".tseries", 'wb')
     file.write(len(collection).to_bytes(8, byteorder='little'))
     for item in collection:
-        file.write(item.time.to_bytes(8, byteorder='little'))
+        file.write(struct.pack('<q', item.time))
         for i in range(0, 3):
             item.pos[i].tofile(file)
 
@@ -124,7 +124,6 @@ def convert_folder(path, out):
 
     for key in time_series:
         print(key)
-        print(type(time_series[key]))
         save_tseries_bin(time_series[key], out)
 
 if __name__ == "__main__":

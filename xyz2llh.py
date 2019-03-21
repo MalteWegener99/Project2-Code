@@ -16,15 +16,15 @@ a = 6378137.  # SMA
 def save_tseries_bin_llh(collection, output_folder):
     #collection = collection.sort(key=lambda x: x.time)
     name = collection[0].name
-    file = open(output_folder + "/" + name + ".tseries_llh", 'wb')
-    file.write(len(collection).to_bytes(8, byteorder='little'))
+    file = open(output_folder + "/" + name + ".tseries.neu", 'wb')
+    file.write(struct.pack('<q', len(collection)))
     for item in collection:
-        file.write(item.time.to_bytes(8, byteorder='little'))
+        file.write(struct.pack('<q', item.time))
         for i in range(0, 3):
-            item.pos[i].tofile(file)
+            file.write(struct.pack('<d', item.pos[i]))
 
         for i in range(0, 3):
-            item.mat[i].tofile(file)
+            file.write(struct.pack('<d', item.err[i]))
 
     file.close()
 
@@ -77,20 +77,19 @@ def parse_binary(path) -> list:
             pos_f = file.tell()
             collection.append(Sample(name, time, pos, mat))
             if not file.read(1):
-                print(n)
-                print(len(collection))
                 return collection
             else:
                 file.seek(pos_f)
 
 
 def transform_list(collection) -> list:
+    collector = []
     for item in collection:
         new_pos = xyz2llh(item.pos)
         error = xyz2llh(item.pos + np.matmul(item.mat, item.pos)) - new_pos;
         
-        item = Sample_conv(item.name, item.time, new_pos, error)
-    return collection
+        collector.append(Sample_conv(item.name, item.time, new_pos, error))
+    return collector
 
 
 def convert_file(file, output):
