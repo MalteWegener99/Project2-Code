@@ -6,6 +6,8 @@
 #include <iostream>
 #include <math.h>
 #include <chrono>
+#include <thread>
+#define  _CRT_SECURE_NO_WARNINGS
 
 double* xyz2llh(double*);
 
@@ -126,5 +128,5 @@ int main(int argc, char* argv[]){
         auto file_to_conv = line.c_str();
         dispatch(file_to_conv, argv[2]);        
     }
-    std::cout << (std::chrono::high_resolution_clock::now()-start).count()/1000000. << std::endl;
+    std::cout << (std::chrono::high_resolution_clock::now()-start).count()/1000000000. << std::endl;
 }

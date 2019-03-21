@@ -5,7 +5,7 @@ import math
 import numpy as np
 import time
 import struct
-from Sample import Sample
+from Sample import Sample, Sample_conv
 
 # WGS 84
 f = 1 / 298.257223563
@@ -15,8 +15,6 @@ a = 6378137.  # SMA
 
 def save_tseries_bin_llh(collection, output_folder):
     #collection = collection.sort(key=lambda x: x.time)
-    print(type(collection))
-    print(type(collection[0]))
     name = collection[0].name
     file = open(output_folder + "/" + name + ".tseries_llh", 'wb')
     file.write(len(collection).to_bytes(8, byteorder='little'))
@@ -26,7 +24,7 @@ def save_tseries_bin_llh(collection, output_folder):
             item.pos[i].tofile(file)
 
         for i in range(0, 3):
-            item.mat[:, i].tofile(file)
+            item.mat[i].tofile(file)
 
     file.close()
 
@@ -89,8 +87,9 @@ def parse_binary(path) -> list:
 def transform_list(collection) -> list:
     for item in collection:
         new_pos = xyz2llh(item.pos)
-        item.pos = new_pos
-    print(collection[0].pos)
+        error = xyz2llh(item.pos + np.matmul(item.mat, item.pos)) - new_pos;
+        
+        item = Sample_conv(item.name, item.time, new_pos, error)
     return collection
 
 
