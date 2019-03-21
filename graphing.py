@@ -6,6 +6,7 @@ import struct
 import datetime
 from math import cos, sin
 import math
+from utils import average_over
 
 def parse_binary_llh(path):
     name = path.split('/')[-1][0:4]
@@ -38,6 +39,7 @@ def parse_binary_llh(path):
 
 def graph_series(series):
     series = sorted(series, key=lambda x: x.time)
+    series = average_over(series, 7)
     mindate = series[0].time
     p0 = np.array(series[0].pos)
     phi, lam, h = p0
@@ -52,8 +54,11 @@ def graph_series(series):
     for elem in series:
         year = elem.time//1000
         days = elem.time - year*1000
-        times.append(datetime.date.fromordinal(datetime.date(year, 1, 1).toordinal() + days - 1))
-        tmp = p0 - elem.pos
+        date = datetime.date.fromordinal(datetime.date(year, 1, 1).toordinal() + days - 1)
+        if not (datetime.date(1999, 1, 1) <= date < datetime.date(2005,1,1)):
+            continue
+        times.append(date)
+        tmp = elem.pos - p0
         positions.append(np.matmul(mat, tmp))
         pos = np.zeros([3])
         errors.append(elem.err)
@@ -65,7 +70,8 @@ def graph_series(series):
     f, axarr = plt.subplots(3, sharex=True)
     f.suptitle('DAMn')
     for i in range(0,3):
-        axarr[i].errorbar(times, plotpos[:, i], yerr=errors[:,i], linewidth=0.5, fmt='o', markersize=0.1)
+        axarr[i].errorbar(times, plotpos[:, i], yerr=errors[:,i], linewidth=0.5, fmt='x', markersize=0.81)
     plt.show()
 
-graph_series(parse_binary_llh(sys.argv[1]))
+if __name__ == "__main__":
+    graph_series(parse_binary_llh(sys.argv[1]))

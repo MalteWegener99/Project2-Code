@@ -34,7 +34,7 @@ def save_tseries_bin_llh(collection, output_folder):
 def xyz2llh(pos):
     # [phi, lambda, h]
     x, y, z = pos
-    lam = math.atan(y/x)
+    lam = 2*math.atan(y/(x+math.sqrt(x**2+y**2)))
 
     p = math.sqrt(x**2 + y**2)
 
