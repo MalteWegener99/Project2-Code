@@ -58,6 +58,8 @@ def graph_series(series):
         year = elem.time//1000
         days = elem.time - year*1000
         date = datetime.date.fromordinal(datetime.date(year, 1, 1).toordinal() + days - 1)
+        if not (datetime.date(1999,1,1) <= date < datetime.date(2012,1,1)):
+            continue
         times.append(date)
         tmp = elem.pos - p0
         positions.append(np.matmul(mat, tmp))
@@ -78,14 +80,22 @@ def graph_series(series):
     north = linregress(times2, plotpos[:, 0])
     east = linregress(times2, plotpos[:, 1])
     up, away = curve_fit(to_fit, times2, plotpos[:, 2])
+    print("{} mm/y".format(north[0]*365*1000))
+    print("{} mm/y".format(east[0]*365*1000))
+    print("{} mm/y".format(up[1]*365*1000))
     print(north)
 
     f, axarr = plt.subplots(3, sharex=True)
     f.suptitle('DAMn')
+    # for i in range(0,3):
+    #     axarr[i].axhline(y=0, color='k')
+    #     axarr[i].set_xlim([times[0], times[-1]])
+    #     axarr[i].errorbar(times, plotpos[:, i], yerr=errors[:,i], linewidth=0.5, fmt='x', markersize=0.81)
+
     for i in range(0,3):
         axarr[i].axhline(y=0, color='k')
         axarr[i].set_xlim([times[0], times[-1]])
-        axarr[i].errorbar(times, plotpos[:, i], yerr=errors[:,i], linewidth=0.5, fmt='x', markersize=0.81)
+        axarr[i].plot(times, plotpos[:, i], linewidth=0.5)
 
     axarr[0].plot([mindate, times[-1]], [north[1], north[1] + north[0]*times2[-1]])
     axarr[1].plot([mindate, times[-1]], [east[1], east[1] + east[0]*times2[-1]])

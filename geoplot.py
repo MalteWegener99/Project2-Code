@@ -21,8 +21,8 @@ if __name__ == "__main__":
         file.write(','.join([name, str(lon), str(lat)]) + '\n')
     file.close()
     
-data = read_csv('tmp.csv')
-print(type(data))
-geoplotlib.dot(data, 'r')
-geoplotlib.labels(data, 'name', color=[0,0,255,255], font_size=10, anchor_x='center')
-geoplotlib.show()
+    data = read_csv('tmp.csv')
+    print(type(data))
+    geoplotlib.dot(data, 'r')
+    geoplotlib.labels(data, 'name', color=[0,0,255,255], font_size=10, anchor_x='center')
+    geoplotlib.show()
