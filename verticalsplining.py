@@ -43,7 +43,7 @@ def load_set(file_name):
     stations_names = open(file_name).readlines()
     stations = dict()
     for name in stations_names:
-        set = sorted(parse_binary_llh(r'../conv/'+name[0:4]+'.tseries.neu'), key=lambda x: x.time)
+        set = sorted(parse_binary_llh(r'conv/'+name[0:4]+'.tseries.neu'), key=lambda x: x.time)
         if (get_date(set[-1])-get_date(set[0])).days >= 1000:
             print(name[0:4])
             print(get_date(set[-1]))
