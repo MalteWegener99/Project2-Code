@@ -117,10 +117,15 @@ def analyse(file_name):
         connections.append(list(sorted([simplex[1],simplex[2]])))
         connections.append(list(sorted([simplex[0],simplex[2]])))
     
-    connections = np.unique(np.array(connections), axis=0)
+    positions = []
+    for i in range(connections.shape[0]):
+        phi1 = splines[connections[i,0]][0](t)
+        lam1 = splines[connections[i,0]][1](t)
+        positions.append([phi1,lam1]))
+
     initial_dist = []
     for i in range(connections.shape[0]):
-        initial_dist.append(great_circle_dist(initial[connections[i,0],:],initial[connections[i,1],:]))
+        initial_dist.append(splines[connections[i,0]][2](0))
     initial_dist = np.array(initial_dist)
 
     rng = (stop-start).days
@@ -130,14 +135,8 @@ def analyse(file_name):
         for i in range(connections.shape[0]):
             phi1 = splines[connections[i,0]][0](t)
             lam1 = splines[connections[i,0]][1](t)
-            strain[i,0,t] = splines[connections[i,0]][2](t)
+            strain[i,0,t] = splines[connections[i,0]][2](t)-initial_dist[i]
             
-    positions = []
-    for i in range(connections.shape[0]):
-        phi1 = splines[connections[i,0]][0](t)
-        lam1 = splines[connections[i,0]][1](t)
-        positions.append([phi1,lam1])
-    print(len(positions))
 
     positions = np.array(positions)
     shape = (500,500)
