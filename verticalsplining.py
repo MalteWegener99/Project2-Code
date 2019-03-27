@@ -116,6 +116,8 @@ def analyse(file_name):
         connections.append(list(sorted([simplex[0],simplex[1]])))
         connections.append(list(sorted([simplex[1],simplex[2]])))
         connections.append(list(sorted([simplex[0],simplex[2]])))
+
+    connections = np.unique(np.array(connections), axis=0)
     
     positions = []
     for i in range(connections.shape[0]):
