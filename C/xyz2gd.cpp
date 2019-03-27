@@ -7,6 +7,7 @@
 #include <math.h>
 #include <chrono>
 #include <thread>
+#include <filesystem>
 #define  _CRT_SECURE_NO_WARNINGS
 
 double* xyz2llh(double*);
