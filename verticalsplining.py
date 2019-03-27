@@ -121,8 +121,8 @@ def analyse(file_name):
     
     positions = []
     for i in range(connections.shape[0]):
-        phi1 = splines[connections[i,0]][0](t)
-        lam1 = splines[connections[i,0]][1](t)
+        phi1 = splines[connections[i,0]][0](0)
+        lam1 = splines[connections[i,0]][1](0)
         positions.append([phi1,lam1])
 
     initial_dist = []
