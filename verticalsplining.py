@@ -59,8 +59,8 @@ def load_set(file_name):
 def make_spline_set(collection, min_date):
     col = []
     for key in collection:
-        phi, lam, *throw = make_spline(collection[key], min_date)
-        col.append([phi,lam])
+        phi, lam, h, *throw = make_spline(collection[key], min_date)
+        col.append([phi,lam, h])
 
     return col
 
