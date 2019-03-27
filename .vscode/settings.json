@@ -4,6 +4,8 @@
         "*.tcc": "cpp",
         "chrono": "cpp",
         "cstring": "cpp",
-        "thread": "cpp"
-    }
+        "thread": "cpp",
+        "cmath": "cpp"
+    },
+    "python.linting.enabled": false
 }

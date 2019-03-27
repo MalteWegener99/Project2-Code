@@ -1,5 +1,5 @@
 __pycache__/Sample.cpython-36.pyc
-__pycache__/xyz2llh.cpython-36.pyc
+__pycache__/*
 *.jpg
 *.JPG
 *.bmp
@@ -10,3 +10,5 @@ Assignment/bmps/pngs/*
 *.exe
 *.out
 *tseries
+.vscode/*
+move.mp4
