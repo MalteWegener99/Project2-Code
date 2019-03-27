@@ -10,3 +10,5 @@ Assignment/bmps/pngs/*
 *.exe
 *.out
 *tseries
+.DS_Stores
+Sample.pyc
