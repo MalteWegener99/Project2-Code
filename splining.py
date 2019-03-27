@@ -9,6 +9,8 @@ from scipy.spatial import Delaunay
 from math import sin, cos, sqrt, asin, acos
 import scipy
 from fatiando import gridder
+import matplotlib.animation as animation
+import types
 
 
 f = 1 / 298.257223563
@@ -145,15 +147,38 @@ def analyse(file_name):
     shape = (500,500)
 
     xp, yp, cubic = gridder.interp(positions[:,1], positions[:,0], strain[:,0,-1], shape, algorithm='cubic', extrapolate=False)
-    cs = plt.contourf(xp.reshape(shape), yp.reshape(shape), cubic.reshape(shape),
-                30, cmap='plasma')
-    plt.colorbar(cs)
+
+    pics = []
+    fig, ax = plt.subplots() 
     vertices = triangulation.points
     simplices = triangulation.simplices
-    plt.triplot(vertices[:,1],vertices[:,0],simplices, linewidth=0.5)
-    plt.scatter(positions[:,1],positions[:,0], s=0.3)
-    plt.axis('equal')
+    minstrain = np.amin(strain)
+    maxstrain = np.amax(strain)
+    cs = 0
+    def animate(t):
+        ax.clear()
+        date = start + datetime.timedelta(days=t)
+        ax.set_title(date)
+        a,b,th = gridder.interp(positions[:,1], positions[:,0], strain[:,0,t], shape, algorithm='cubic', extrapolate=False)
+        cs = ax.contourf(xp.reshape(shape), yp.reshape(shape), th.reshape(shape),80, cmap='jet', vmin=minstrain, vmax=maxstrain)
+        grid = ax.triplot(vertices[:,1],vertices[:,0],simplices, linewidth=0.5)
+        ax.axis('equal')
+        return [cs,grid]
+
+    ani = animation.FuncAnimation(fig, animate, frames=range(0,rng,7), interval=5, save_count=500, blit=False)
     plt.show()
+        
+
+    #cs = plt.contourf(xp.reshape(shape), yp.reshape(shape), cubic.reshape(shape),
+                #30, cmap='plasma')
+
+    #plt.colorbar(cs)
+    #vertices = triangulation.points
+    #simplices = triangulation.simplices
+    #plt.triplot(vertices[:,1],vertices[:,0],simplices, linewidth=0.5)
+    #plt.scatter(positions[:,1],positions[:,0], s=0.3)
+    #plt.axis('equal')
+    #plt.show()
 
 if __name__ == "__main__":
     analyse(r'malaysia.txt')
