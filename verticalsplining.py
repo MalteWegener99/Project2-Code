@@ -138,8 +138,9 @@ def analyse(file_name):
     for i in range(connections.shape[0]):
         phi1 = splines[connections[i,0]][0](t)
         lam1 = splines[connections[i,0]][1](t)
-        height = splines[connections[i,0]][2](t)
-        positions.append([phi1,lam1,height)
+        phi2 = splines[connections[i,1]][0](t)
+        lam2 = splines[connections[i,1]][1](t)
+        positions.append([(phi1+phi2)/2,(lam1+lam2)/2])
     print(len(positions))
 
     positions = np.array(positions)
@@ -158,7 +159,7 @@ def analyse(file_name):
         ax.clear()
         date = start + datetime.timedelta(days=t)
         ax.set_title(date)
-        a,b,th = gridder.interp(positions[:,1], positions[:,0], positions[:,2], shape, algorithm='cubic', extrapolate=False)
+        a,b,th = gridder.interp(positions[:,1], positions[:,0], strain[:,0,t], shape, algorithm='cubic', extrapolate=False)
         cs = ax.contourf(xp.reshape(shape), yp.reshape(shape), th.reshape(shape),200, cmap='jet', vmin=minstrain, vmax=maxstrain)
         grid = ax.triplot(vertices[:,1],vertices[:,0],simplices, linewidth=0.5)
         ax.axis('equal')
