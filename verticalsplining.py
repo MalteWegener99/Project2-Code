@@ -130,17 +130,13 @@ def analyse(file_name):
         for i in range(connections.shape[0]):
             phi1 = splines[connections[i,0]][0](t)
             lam1 = splines[connections[i,0]][1](t)
-            phi2 = splines[connections[i,1]][0](t)
-            lam2 = splines[connections[i,1]][1](t)
-            strain[i,0,t] = great_circle_dist([phi1,lam1],[phi2,lam2])/initial_dist[i]
-    
+            strain[i,0,t] = splines[connections[i,0]][2](t)
+            
     positions = []
     for i in range(connections.shape[0]):
         phi1 = splines[connections[i,0]][0](t)
         lam1 = splines[connections[i,0]][1](t)
-        phi2 = splines[connections[i,1]][0](t)
-        lam2 = splines[connections[i,1]][1](t)
-        positions.append([(phi1+phi2)/2,(lam1+lam2)/2])
+        positions.append([phi1,lam1)
     print(len(positions))
 
     positions = np.array(positions)
