@@ -160,13 +160,11 @@ def analyse(file_name):
         date = start + datetime.timedelta(days=t)
         ax.set_title(date)
         a,b,th = gridder.interp(positions[:,1], positions[:,0], strain[:,0,t], shape, algorithm='cubic', extrapolate=False)
-        cs = ax.contourf(xp.reshape(shape), yp.reshape(shape), th.reshape(shape),80, cmap='jet', vmin=minstrain, vmax=maxstrain)
+        cs = ax.contourf(xp.reshape(shape), yp.reshape(shape), th.reshape(shape),200, cmap='jet', vmin=minstrain, vmax=maxstrain)
         grid = ax.triplot(vertices[:,1],vertices[:,0],simplices, linewidth=0.5)
-        sc = plt.colorbar(cs)
         ax.axis('equal')
-        return [sc]
 
-    ani = animation.FuncAnimation(fig, animate, frames=range(0,rng,7), interval=5, save_count=500, blit=False)
+    ani = animation.FuncAnimation(fig, animate, frames=range(0,rng,7), interval=80, save_count=500, blit=False)
     ani.save("move.mp4")
     plt.show()
         
