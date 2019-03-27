@@ -61,5 +61,5 @@ def graph_series(series):
     axarr[1].scatter(times, positions[:, 1], s=0.01)
     axarr[2].scatter(times, positions[:, 2], s=0.01)
     plt.show()
-
-graph_series(parse_binary_llh(sys.argv[1]))
+if __name__ == "__main__":
+    graph_series(parse_binary_llh(sys.argv[1]))
