@@ -156,6 +156,7 @@ def analyse(file_name):
     minstrain = np.amin(strain)
     maxstrain = np.amax(strain)
     cs = 0
+    global legend
     
     def animate(t, *args):
         global legend
