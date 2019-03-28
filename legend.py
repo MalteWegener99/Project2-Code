@@ -168,7 +168,7 @@ def analyse(file_name):
             args[0].remove()
         args[0] = fig.colorbar(cs)
 
-    ani = animation.FuncAnimation(fig, animate, frames=range(0,rng,7), interval=80, save_count=500, blit=False, fargs=(legend))
+    ani = animation.FuncAnimation(fig, animate, frames=range(0,rng,7), interval=80, save_count=500, blit=False, fargs=[legend])
     #ani.save("move.mp4")
     plt.show()
         
