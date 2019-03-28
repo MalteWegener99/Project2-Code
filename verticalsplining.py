@@ -43,7 +43,7 @@ def load_set(file_name):
     stations_names = open(file_name).readlines()
     stations = dict()
     for name in stations_names:
-        set = sorted(parse_binary_llh(r'../conv/'+name[0:4]+'.tseries.neu'), key=lambda x: x.time)
+        set = sorted(parse_binary_llh(r'conv/'+name[0:4]+'.tseries.neu'), key=lambda x: x.time)
         if (get_date(set[-1])-get_date(set[0])).days >= 1000:
             print(name[0:4])
             print(get_date(set[-1]))
@@ -59,8 +59,8 @@ def load_set(file_name):
 def make_spline_set(collection, min_date):
     col = []
     for key in collection:
-        phi, lam, *throw = make_spline(collection[key], min_date)
-        col.append([phi,lam])
+        phi, lam, h, *throw = make_spline(collection[key], min_date)
+        col.append([phi,lam, h])
 
     return col
 
@@ -116,11 +116,18 @@ def analyse(file_name):
         connections.append(list(sorted([simplex[0],simplex[1]])))
         connections.append(list(sorted([simplex[1],simplex[2]])))
         connections.append(list(sorted([simplex[0],simplex[2]])))
-    
+
     connections = np.unique(np.array(connections), axis=0)
+    
+    positions = []
+    for i in range(connections.shape[0]):
+        phi1 = splines[connections[i,0]][0](0)
+        lam1 = splines[connections[i,0]][1](0)
+        positions.append([phi1,lam1])
+
     initial_dist = []
     for i in range(connections.shape[0]):
-        initial_dist.append(great_circle_dist(initial[connections[i,0],:],initial[connections[i,1],:]))
+        initial_dist.append(splines[connections[i,0]][2](0))
     initial_dist = np.array(initial_dist)
 
     rng = (stop-start).days
@@ -130,18 +137,8 @@ def analyse(file_name):
         for i in range(connections.shape[0]):
             phi1 = splines[connections[i,0]][0](t)
             lam1 = splines[connections[i,0]][1](t)
-            phi2 = splines[connections[i,1]][0](t)
-            lam2 = splines[connections[i,1]][1](t)
-            strain[i,0,t] = great_circle_dist([phi1,lam1],[phi2,lam2])/initial_dist[i]
-    
-    positions = []
-    for i in range(connections.shape[0]):
-        phi1 = splines[connections[i,0]][0](t)
-        lam1 = splines[connections[i,0]][1](t)
-        phi2 = splines[connections[i,1]][0](t)
-        lam2 = splines[connections[i,1]][1](t)
-        positions.append([(phi1+phi2)/2,(lam1+lam2)/2])
-    print(len(positions))
+            strain[i,0,t] = splines[connections[i,0]][2](t)-initial_dist[i]
+            
 
     positions = np.array(positions)
     shape = (500,500)
@@ -159,7 +156,7 @@ def analyse(file_name):
         ax.clear()
         date = start + datetime.timedelta(days=t)
         ax.set_title(date)
-        a,b,th = gridder.interp(positions[:,1], positions[:,0],  strain[:,0,t], shape, algorithm='cubic', extrapolate=False)
+        a,b,th = gridder.interp(positions[:,1], positions[:,0], strain[:,0,t], shape, algorithm='cubic', extrapolate=False)
         cs = ax.contourf(xp.reshape(shape), yp.reshape(shape), th.reshape(shape),200, cmap='jet', vmin=minstrain, vmax=maxstrain)
         grid = ax.triplot(vertices[:,1],vertices[:,0],simplices, linewidth=0.5)
         ax.axis('equal')
