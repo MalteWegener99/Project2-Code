@@ -155,7 +155,7 @@ def analyse(file_name):
     minstrain = np.amin(strain)
     maxstrain = np.amax(strain)
     cs = 0
-    legend = None
+    global legend = None
     def animate(t):
         ax.clear()
         date = start + datetime.timedelta(days=t)
@@ -164,7 +164,7 @@ def analyse(file_name):
         cs = ax.contourf(xp.reshape(shape), yp.reshape(shape), th.reshape(shape),200, cmap='jet', vmin=minstrain, vmax=maxstrain)
         grid = ax.triplot(vertices[:,1],vertices[:,0],simplices, linewidth=0.5)
         global legend.remove()
-        legend = fig.colorbar(cs)
+        global legend = fig.colorbar(cs)
 
     ani = animation.FuncAnimation(fig, animate, frames=range(0,rng,7), interval=80, save_count=500, blit=False)
     #ani.save("move.mp4")
