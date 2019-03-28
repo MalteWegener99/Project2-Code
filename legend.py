@@ -12,7 +12,7 @@ from fatiando import gridder
 import matplotlib.animation as animation
 import types
 
-legend = None
+legend = plt.colorbar()
 
 f = 1 / 298.257223563
 e_2 = 2 * f - f**2
@@ -156,7 +156,6 @@ def analyse(file_name):
     minstrain = np.amin(strain)
     maxstrain = np.amax(strain)
     cs = 0
-    global legend
     
     def animate(t, *args):
         global legend
