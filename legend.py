@@ -43,7 +43,7 @@ def load_set(file_name):
     stations_names = open(file_name).readlines()
     stations = dict()
     for name in stations_names:
-        set = sorted(parse_binary_llh(r'../conv/'+name[0:4]+'.tseries.neu'), key=lambda x: x.time)
+        set = sorted(parse_binary_llh(r'conv/'+name[0:4]+'.tseries.neu'), key=lambda x: x.time)
         if (get_date(set[-1])-get_date(set[0])).days >= 1000:
             print(name[0:4])
             print(get_date(set[-1]))
@@ -155,6 +155,7 @@ def analyse(file_name):
     minstrain = np.amin(strain)
     maxstrain = np.amax(strain)
     cs = 0
+    legend = plt.legend()
     def animate(t):
         ax.clear()
         date = start + datetime.timedelta(days=t)
@@ -163,22 +164,24 @@ def analyse(file_name):
         cs = ax.contourf(xp.reshape(shape), yp.reshape(shape), th.reshape(shape),200, cmap='jet', vmin=minstrain, vmax=maxstrain)
         grid = ax.triplot(vertices[:,1],vertices[:,0],simplices, linewidth=0.5)
         ax.axis('equal')
+        legend.remove()
+        legend = ax.legend()
 
     ani = animation.FuncAnimation(fig, animate, frames=range(0,rng,7), interval=80, save_count=500, blit=False)
     ani.save("move.mp4")
     plt.show()
         
 
-    #cs = plt.contourf(xp.reshape(shape), yp.reshape(shape), cubic.reshape(shape),
-                #30, cmap='plasma')
+    # cs = plt.contourf(xp.reshape(shape), yp.reshape(shape), cubic.reshape(shape),
+    #             30, cmap='plasma')
 
-    #plt.colorbar(cs)
-    #vertices = triangulation.points
-    #simplices = triangulation.simplices
-    #plt.triplot(vertices[:,1],vertices[:,0],simplices, linewidth=0.5)
-    #plt.scatter(positions[:,1],positions[:,0], s=0.3)
-    #plt.axis('equal')
-    #plt.show()
+    # plt.colorbar(cs)
+    # vertices = triangulation.points
+    # simplices = triangulation.simplices
+    # plt.triplot(vertices[:,1],vertices[:,0],simplices, linewidth=0.5)
+    # plt.scatter(positions[:,1],positions[:,0], s=0.3)
+    # plt.axis('equal')
+    # plt.show()
 
 if __name__ == "__main__":
     analyse(r'malaysia.txt')
