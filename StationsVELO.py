@@ -63,7 +63,7 @@ with open('SLOCs.csv', mode='w', newline='') as SLOCs:
 #plot stations
 Plotdata1 = read_csv('VLOCs.csv')
 Plotdata2 = read_csv('SLOCs.csv')
-gp.graph(Plotdata1, 'S_lat', 'S_lon', 'D_lat', 'D_lon', linewidth=3, color='cold')
+gp.graph(Plotdata1, 'S_lat', 'S_lon', 'D_lat', 'D_lon', linewidth=3, color='hot')
 gp.dot(Plotdata2, color='red', point_size=2)
 #optional: gp.labels(Plotdata, 'name', color='black', font_size=8, anchor_x='center')
 gp.tiles_provider('positron')
