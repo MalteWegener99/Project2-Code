@@ -155,7 +155,7 @@ def analyse(file_name):
     minstrain = np.amin(strain)
     maxstrain = np.amax(strain)
     cs = 0
-    legend = plt.colorbar()
+    legend = None
     def animate(t):
         ax.clear()
         date = start + datetime.timedelta(days=t)
