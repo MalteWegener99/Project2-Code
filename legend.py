@@ -11,6 +11,7 @@ import scipy
 from fatiando import gridder
 import matplotlib.animation as animation
 import types
+from matplotlib.collections import LineCollection
 
 legend = plt.colorbar()
 
@@ -156,9 +157,11 @@ def analyse(file_name):
     minstrain = np.amin(strain)
     maxstrain = np.amax(strain)
     cs = 0
+    # cax = ax.pcolormesh(x, y, G[:-1, :-1, 0], vmin=-1, vmax=1, cmap='jet')
+    # fig.colorbar(cax)
     
-    def animate(t, *args):
-        global legend
+    def animate(t):
+        
         ax.clear()
         date = start + datetime.timedelta(days=t)
         ax.set_title(date)
@@ -166,9 +169,11 @@ def analyse(file_name):
         cs = ax.contourf(xp.reshape(shape), yp.reshape(shape), th.reshape(shape),200, cmap='jet', vmin=minstrain, vmax=maxstrain)
         grid = ax.triplot(vertices[:,1],vertices[:,0],simplices, linewidth=0.5)
         ax.axis('equal')
-        if t != 0:
-            args[0].remove()
-        legend = fig.colorbar(cs)
+        
+        norm = plt.Normalize(strain.min(), strain.max())
+        lc = LineCollection(cmap='jet', norm=norm)
+        fig.colorbar(ax=axs[0])
+        
 
     ani = animation.FuncAnimation(fig, animate, frames=range(0,rng,7), interval=80, save_count=500, blit=False, fargs=[legend])
     #ani.save("move.mp4")
