@@ -8,7 +8,7 @@ from graphing import parse_binary_llh
 from math import degrees as deg
 
 #path to converted files
-path = 'C:/Users/rdenb/Documents/Project2-Code/conv'
+path = os.path.dirname(os.path.realpath(__file__))+'/conv'
 os.chdir(path)
 
 #get starting location of all stations from files
@@ -22,8 +22,7 @@ for file in os.listdir():
         Locations.append([Sname,deg(series[0].pos[0]),deg(series[0].pos[1])])
 
 #path to SLOCs.csv
-path = 'C:/Users/rdenb/Documents/Project2-Code'
-os.chdir(path)
+os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 #empty SLOCs.csv
 f = open("SLOCs.csv", "w+")
@@ -38,16 +37,13 @@ with open('SLOCs.csv', mode='w', newline='') as SLOCs:
 
 #plot stations
 Plotdata = read_csv('SLOCs.csv')
-gp.dot(Plotdata, color='red', point_size=1.75)
-gp.labels(Plotdata, 'name', color='black', font_size=8, anchor_x='center')
-gp.tiles_provider({
-    'url': lambda zoom, xtile, ytile: 'http://a.tile.stamen.com/watercolor/%d/%d/%d.png' % (zoom, xtile, ytile),
-    'tiles_dir': 'mytiles',
-    'attribution': 'my attribution'
-})
+gp.dot(Plotdata, color='red', point_size=2)
+#optional: gp.labels(Plotdata, 'name', color='black', font_size=8, anchor_x='center')
 gp.tiles_provider('positron')
 
 gp.show()
+
+
 
 'https://maps-for-free.com/layer/relief/z{Z}/row{Y}/{Z}_{X}-{Y}.jpg'
 #ToDo: change tile to map from the web (url above)
