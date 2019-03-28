@@ -122,10 +122,10 @@ def analyse(file_name):
         initial_dist.append(great_circle_dist(initial[connections[i,0],:],initial[connections[i,1],:]))
     initial_dist = np.array(initial_dist)
 
-    rng = (stop-start).days
+    rng = (stop-start).days-50
     strain = np.zeros((connections.shape[0],1,rng))
 
-    for t in range(0,rng-50):
+    for t in range(0,rng):
         for i in range(connections.shape[0]):
             phi1 = splines[connections[i,0]][0](t)
             lam1 = splines[connections[i,0]][1](t)
@@ -140,10 +140,13 @@ def analyse(file_name):
         phi2 = splines[connections[i,1]][0](t)
         lam2 = splines[connections[i,1]][1](t)
         positions.append([(phi1+phi2)/2,(lam1+lam2)/2])
+
     print(len(positions))
 
     positions = np.array(positions)
     shape = (500,500)
+    plt.plot(strain[0,0,:])
+    plt.show()
 
     xp, yp, cubic = gridder.interp(positions[:,1], positions[:,0], strain[:,0,-1], shape, algorithm='cubic', extrapolate=False)
 
@@ -163,7 +166,7 @@ def analyse(file_name):
         grid = ax.triplot(vertices[:,1],vertices[:,0],simplices, linewidth=0.5)
         ax.axis('equal')
 
-    ani = animation.FuncAnimation(fig, animate, frames=range(0,rng-50,7), interval=80, save_count=500, blit=False)
+    ani = animation.FuncAnimation(fig, animate, frames=range(0,rng,7), interval=80, save_count=500, blit=False)
     ani.save("move.mp4")
     plt.show()
         
