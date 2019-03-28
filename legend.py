@@ -12,6 +12,7 @@ from fatiando import gridder
 import matplotlib.animation as animation
 import types
 
+legend = None
 
 f = 1 / 298.257223563
 e_2 = 2 * f - f**2
@@ -155,8 +156,9 @@ def analyse(file_name):
     minstrain = np.amin(strain)
     maxstrain = np.amax(strain)
     cs = 0
-    legend = None
+    
     def animate(t, *args):
+        global legend
         ax.clear()
         date = start + datetime.timedelta(days=t)
         ax.set_title(date)
