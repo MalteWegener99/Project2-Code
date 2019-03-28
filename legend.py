@@ -166,7 +166,7 @@ def analyse(file_name):
         ax.axis('equal')
         if t != 0:
             legend.remove()
-        legend = ax.colorbar(cs)
+        legend = fig.colorbar(cs)
 
     ani = animation.FuncAnimation(fig, animate, frames=range(0,rng,7), interval=80, save_count=500, blit=False)
     #ani.save("move.mp4")
