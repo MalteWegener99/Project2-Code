@@ -155,7 +155,7 @@ def analyse(file_name):
     minstrain = np.amin(strain)
     maxstrain = np.amax(strain)
     cs = 0
-    legend = plt.legend()
+    legend = plt.colorbar()
     def animate(t):
         ax.clear()
         date = start + datetime.timedelta(days=t)
@@ -166,7 +166,7 @@ def analyse(file_name):
         ax.axis('equal')
         if t != 0:
             legend.remove()
-        legend = ax.legend()
+        legend = ax.colorbar(cs)
 
     ani = animation.FuncAnimation(fig, animate, frames=range(0,rng,7), interval=80, save_count=500, blit=False)
     #ani.save("move.mp4")
