@@ -125,8 +125,8 @@ def analyse(file_name):
             lam1 = splines[i][1](t)
             phiog = splines[0][0](t)-initial[0,0]
             lamog = splines[0][1](t)-initial[0,1]
-            positions[i,0,t] = phi0 + factor*(phi1-phi0-phiog)
-            positions[i,1,t] = lam0 + factor*(lam1-lam0-lamog)
+            positions[i,0,t] = phi0 + factor*(phi1-phi0)#-phiog)
+            positions[i,1,t] = lam0 + factor*(lam1-lam0)#-lamog)
 
 
     simplices = triangulation.simplices
