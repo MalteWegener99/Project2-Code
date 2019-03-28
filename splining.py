@@ -26,7 +26,7 @@ def get_date(elem):
 def make_spline(collection, start_date):
     collection = sorted(collection, key=lambda x: x.time)
     collection = average_over(collection, 7)
-    dates = [0]
+    dates = [-1]
     phi = [collection[0].pos[0]]
     lam = [collection[0].pos[1]]
     h = [collection[0].pos[2]]
@@ -106,8 +106,8 @@ def analyse(file_name):
     splines = make_spline_set(data, start)
     initial = np.zeros((len(splines), 2))
     for i in range(initial.shape[0]):
-        initial[i,0] = splines[i][0](0)
-        initial[i,1] = splines[i][1](0)
+        initial[i,0] = splines[i][0](1)
+        initial[i,1] = splines[i][1](1)
     
     triangulation = Delaunay(initial)
     connections = []
@@ -125,7 +125,7 @@ def analyse(file_name):
     rng = (stop-start).days
     strain = np.zeros((connections.shape[0],1,rng))
 
-    for t in range(0,rng-10):
+    for t in range(0,rng-50):
         for i in range(connections.shape[0]):
             phi1 = splines[connections[i,0]][0](t)
             lam1 = splines[connections[i,0]][1](t)
@@ -163,7 +163,7 @@ def analyse(file_name):
         grid = ax.triplot(vertices[:,1],vertices[:,0],simplices, linewidth=0.5)
         ax.axis('equal')
 
-    ani = animation.FuncAnimation(fig, animate, frames=range(0,rng-10,7), interval=80, save_count=500, blit=False)
+    ani = animation.FuncAnimation(fig, animate, frames=range(0,rng-50,7), interval=80, save_count=500, blit=False)
     ani.save("move.mp4")
     plt.show()
         
