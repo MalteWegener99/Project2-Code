@@ -10,6 +10,7 @@ from math import sin, cos, sqrt, asin, acos
 import scipy
 import matplotlib.animation as animation
 import types
+from scipy.interpolate import interp1d
 
 
 f = 1 / 298.257223563
@@ -25,18 +26,17 @@ def get_date(elem):
 def make_spline(collection, start_date):
     collection = sorted(collection, key=lambda x: x.time)
     collection = average_over(collection, 7)
-    dates = []
-    phi = []
-    lam = []
-    h = []
+    dates = [0]
+    phi = [collection[0].pos[0]]
+    lam = [collection[0].pos[1]]
+    h = [collection[0].pos[2]]
     for elem in collection:
         if (get_date(elem)-start_date).days >= 0:
             dates.append((get_date(elem)-start_date).days)
             phi.append(elem.pos[0])
             lam.append(elem.pos[1])
             h.append(elem.pos[2])
-
-    return (CubicSpline(dates, phi),CubicSpline(dates, lam), CubicSpline(dates, h), dates)
+    return (scipy.interpolate.interp1d(dates, phi),scipy.interpolate.interp1d(dates, lam), scipy.interpolate.interp1d(dates, h), dates)
 
 def load_set(file_name):
     stations_names = open(file_name).readlines()
@@ -107,16 +107,17 @@ def analyse(file_name):
     initial = np.zeros((len(splines), 2))
     print(len(splines))
     for i in range(initial.shape[0]):
-        initial[i,0] = splines[i][0](0)
-        initial[i,1] = splines[i][1](0)
+        initial[i,0] = splines[i][0](1)
+        initial[i,1] = splines[i][1](1)
     
+    rng = (stop-start).days
+
     triangulation = Delaunay(initial)
 
     factor = 400000
-    rng = (stop-start).days
 
     positions = np.zeros((initial.shape[0],initial.shape[1],rng))
-    for t in range(0,rng,7):
+    for t in range(1,rng-10,7):
         for i in range(0,positions.shape[0]):
             phi0 = initial[i,0]
             lam0 = initial[i,1]
@@ -141,7 +142,7 @@ def analyse(file_name):
         ax.triplot(vertices[:,1],vertices[:,0],simplices, linewidth=0.5)
         ax.axis('equal')
 
-    ani = animation.FuncAnimation(fig, animate, frames=range(0,rng,7), interval=200, save_count=500, blit=False)
+    ani = animation.FuncAnimation(fig, animate, frames=range(1,rng-10,7), interval=100, save_count=500, blit=False)
     #ani.save("move.mp4")
     plt.show()
         

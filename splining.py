@@ -26,18 +26,17 @@ def get_date(elem):
 def make_spline(collection, start_date):
     collection = sorted(collection, key=lambda x: x.time)
     collection = average_over(collection, 7)
-    dates = []
-    phi = []
-    lam = []
-    h = []
+    dates = [0]
+    phi = [collection[0].pos[0]]
+    lam = [collection[0].pos[1]]
+    h = [collection[0].pos[2]]
     for elem in collection:
         if (get_date(elem)-start_date).days >= 0:
             dates.append((get_date(elem)-start_date).days)
             phi.append(elem.pos[0])
             lam.append(elem.pos[1])
             h.append(elem.pos[2])
-
-    return (CubicSpline(dates, phi),CubicSpline(dates, lam), CubicSpline(dates, h), dates)
+    return (scipy.interpolate.interp1d(dates, phi),scipy.interpolate.interp1d(dates, lam), scipy.interpolate.interp1d(dates, h), dates)
 
 def load_set(file_name):
     stations_names = open(file_name).readlines()
@@ -126,7 +125,7 @@ def analyse(file_name):
     rng = (stop-start).days
     strain = np.zeros((connections.shape[0],1,rng))
 
-    for t in range(0,rng):
+    for t in range(0,rng-10):
         for i in range(connections.shape[0]):
             phi1 = splines[connections[i,0]][0](t)
             lam1 = splines[connections[i,0]][1](t)
@@ -164,7 +163,7 @@ def analyse(file_name):
         grid = ax.triplot(vertices[:,1],vertices[:,0],simplices, linewidth=0.5)
         ax.axis('equal')
 
-    ani = animation.FuncAnimation(fig, animate, frames=range(0,rng,7), interval=80, save_count=500, blit=False)
+    ani = animation.FuncAnimation(fig, animate, frames=range(0,rng-10,7), interval=80, save_count=500, blit=False)
     ani.save("move.mp4")
     plt.show()
         
