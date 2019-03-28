@@ -13,7 +13,7 @@ import matplotlib.animation as animation
 import types
 from matplotlib.collections import LineCollection
 
-legend = plt.colorbar()
+
 
 f = 1 / 298.257223563
 e_2 = 2 * f - f**2
