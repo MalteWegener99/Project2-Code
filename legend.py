@@ -164,11 +164,12 @@ def analyse(file_name):
         cs = ax.contourf(xp.reshape(shape), yp.reshape(shape), th.reshape(shape),200, cmap='jet', vmin=minstrain, vmax=maxstrain)
         grid = ax.triplot(vertices[:,1],vertices[:,0],simplices, linewidth=0.5)
         ax.axis('equal')
-        legend.remove()
+        if t != 0:
+            legend.remove()
         legend = ax.legend()
 
     ani = animation.FuncAnimation(fig, animate, frames=range(0,rng,7), interval=80, save_count=500, blit=False)
-    ani.save("move.mp4")
+    #ani.save("move.mp4")
     plt.show()
         
 
