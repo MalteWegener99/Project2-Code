@@ -161,7 +161,7 @@ def analyse(file_name):
         ax.clear()
         date = start + datetime.timedelta(days=t)
         ax.set_title(date)
-        a,b,th = gridder.interp(positions[:,1], positions[:,0], strain[:,0,t], shape, algorithm='cubic', extrapolate=False)
+        a,b,th = gridder.interp(positions[:,1], positions[:,0], strain[:,0,t], shape, algorithm='linear', extrapolate=False)
         cs = ax.contourf(xp.reshape(shape), yp.reshape(shape), th.reshape(shape),200, cmap='jet', vmin=minstrain, vmax=maxstrain)
         grid = ax.triplot(vertices[:,1],vertices[:,0],simplices, linewidth=0.5)
         ax.axis('equal')
