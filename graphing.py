@@ -61,7 +61,7 @@ def graph_series(series):
         if not (datetime.date(1999,1,1) <= date < datetime.date(2012,1,1)):
             continue
         times.append(date)
-        tmp = elem.pos - p0
+        tmp = p0 - elem.pos
         positions.append(np.matmul(mat, tmp))
         print(np.matmul(mat, tmp))
         pos = np.zeros([3])
@@ -95,7 +95,7 @@ def graph_series(series):
     for i in range(0,3):
         axarr[i].axhline(y=0, color='k')
         axarr[i].set_xlim([times[0], times[-1]])
-        axarr[i].plot(times, plotpos[:, i], linewidth=0.5)
+        axarr[i].errorbar(times, plotpos[:, i], yerr=errors[:,i], linewidth=0.5, fmt='x', markersize=0.81)
 
     axarr[0].plot([mindate, times[-1]], [north[1], north[1] + north[0]*times2[-1]])
     axarr[1].plot([mindate, times[-1]], [east[1], east[1] + east[0]*times2[-1]])

@@ -8,9 +8,9 @@ import numpy as np
 from scipy.spatial import Delaunay
 from math import sin, cos, sqrt, asin, acos
 import scipy
-from fatiando import gridder
 import matplotlib.animation as animation
 import types
+from scipy.interpolate import interp1d
 
 
 f = 1 / 298.257223563
@@ -26,7 +26,7 @@ def get_date(elem):
 def make_spline(collection, start_date):
     collection = sorted(collection, key=lambda x: x.time)
     collection = average_over(collection, 7)
-    dates = [-1]
+    dates = [0]
     phi = [collection[0].pos[0]]
     lam = [collection[0].pos[1]]
     h = [collection[0].pos[2]]
@@ -105,69 +105,45 @@ def analyse(file_name):
     data, start, stop = load_set(file_name)
     splines = make_spline_set(data, start)
     initial = np.zeros((len(splines), 2))
+    print(len(splines))
     for i in range(initial.shape[0]):
         initial[i,0] = splines[i][0](1)
         initial[i,1] = splines[i][1](1)
     
+    rng = (stop-start).days
+
     triangulation = Delaunay(initial)
-    connections = []
-    for simplex in triangulation.simplices:
-        connections.append(list(sorted([simplex[0],simplex[1]])))
-        connections.append(list(sorted([simplex[1],simplex[2]])))
-        connections.append(list(sorted([simplex[0],simplex[2]])))
-    
-    connections = np.unique(np.array(connections), axis=0)
-    initial_dist = []
-    for i in range(connections.shape[0]):
-        initial_dist.append(great_circle_dist(initial[connections[i,0],:],initial[connections[i,1],:]))
-    initial_dist = np.array(initial_dist)
 
-    rng = (stop-start).days-50
-    strain = np.zeros((connections.shape[0],1,rng))
+    factor = 400000
 
-    for t in range(0,rng):
-        for i in range(connections.shape[0]):
-            phi1 = splines[connections[i,0]][0](t)
-            lam1 = splines[connections[i,0]][1](t)
-            phi2 = splines[connections[i,1]][0](t)
-            lam2 = splines[connections[i,1]][1](t)
-            strain[i,0,t] = great_circle_dist([phi1,lam1],[phi2,lam2])/initial_dist[i]
-    
-    positions = []
-    for i in range(connections.shape[0]):
-        phi1 = splines[connections[i,0]][0](t)
-        lam1 = splines[connections[i,0]][1](t)
-        phi2 = splines[connections[i,1]][0](t)
-        lam2 = splines[connections[i,1]][1](t)
-        positions.append([(phi1+phi2)/2,(lam1+lam2)/2])
+    positions = np.zeros((initial.shape[0],initial.shape[1],rng))
+    for t in range(1,rng-10,7):
+        for i in range(0,positions.shape[0]):
+            phi0 = initial[i,0]
+            lam0 = initial[i,1]
+            phi1 = splines[i][0](t)
+            lam1 = splines[i][1](t)
+            phiog = splines[0][0](t)-initial[0,0]
+            lamog = splines[0][1](t)-initial[0,1]
+            positions[i,0,t] = phi0 + factor*(phi1-phi0)#-phiog)
+            positions[i,1,t] = lam0 + factor*(lam1-lam0)#-lamog)
 
-    print(len(positions))
 
-    positions = np.array(positions)
-    shape = (500,500)
-    plt.plot(strain[0,0,:])
-    plt.show()
-
-    xp, yp, cubic = gridder.interp(positions[:,1], positions[:,0], strain[:,0,-1], shape, algorithm='cubic', extrapolate=False)
-
-    pics = []
-    fig, ax = plt.subplots() 
-    vertices = triangulation.points
     simplices = triangulation.simplices
-    minstrain = np.amin(strain)
-    maxstrain = np.amax(strain)
-    cs = 0
+    vertices = triangulation.points
+    fig, ax = plt.subplots()
+    print(positions.shape) 
     def animate(t):
         ax.clear()
         date = start + datetime.timedelta(days=t)
         ax.set_title(date)
-        a,b,th = gridder.interp(positions[:,1], positions[:,0], strain[:,0,t], shape, algorithm='linear', extrapolate=False)
-        cs = ax.contourf(xp.reshape(shape), yp.reshape(shape), th.reshape(shape),200, cmap='jet', vmin=minstrain, vmax=maxstrain)
-        grid = ax.triplot(vertices[:,1],vertices[:,0],simplices, linewidth=0.5)
+        ax.set_xlim([1.72,1.84])
+        ax.triplot(positions[:,1,t],positions[:,0,t],simplices, linewidth=1.0)
+        ax.triplot(vertices[:,1],vertices[:,0],simplices, linewidth=0.5)
         ax.axis('equal')
 
-    ani = animation.FuncAnimation(fig, animate, frames=range(0,rng,7), interval=80, save_count=500, blit=False)
-    ani.save("move.mp4")
+    ani = animation.FuncAnimation(fig, animate, frames=range(1,rng-10,7), interval=100, save_count=500, blit=False)
+    #ani.save("move.mp4")
     plt.show()
         
 
