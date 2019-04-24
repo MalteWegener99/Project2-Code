@@ -36,7 +36,7 @@ def parse_binary_llh(path):
 
             pos_f = file.tell()
             collection.append(Sample_conv(name, time, pos, mat))
-            ncol = collection[1,2]
+            ncol = collection[1:3]
             ncol = outlierdet(ncol,300,1)
             collection[1] = ncol[0]
             collection[2] = ncol[1]
