@@ -71,16 +71,19 @@ def parse_binary_llh(path):
             newdatay = outlierdet(datay,300,1)
             newdataz = outlierdet(dataz,300,1)
             # inl_x, inl_y, outl_x, outl_y = outlierdet(times,locations,0.45)
-            plt.subplot(3,1,1)
-            plt.scatter(newdatax[:,0],newdatax[:,1],s = 2)
-            # plt.scatter(times,d_ave)
-            plt.subplot(3,1,2)
-            plt.scatter(newdatay[:,0],newdatay[:,1],s = 2)
-            plt.subplot(3,1,3)
-            plt.scatter(newdataz[:,0],newdataz[:,1],s = 2)
+        plt.subplot(3,1,1)
+        plt.scatter(newdatax[:,0],newdatax[:,1],s = 2)
+        plt.ylim(min(newdatax[:,1]),max(newdatax[:,1]))
+         # plt.scatter(times,d_ave)
+        plt.subplot(3,1,2)
+        plt.scatter(newdatay[:,0],newdatay[:,1],s = 2)
+        plt.ylim(min(newdatay[:,1]),max(newdatay[:,1]))
+        plt.subplot(3,1,3)
+        plt.scatter(newdataz[:,0],newdataz[:,1],s = 2)
+        plt.ylim(min(newdataz[:,1]),max(newdataz[:,1]))
 
-            plt.autoscale(enable=True,axis = "y",tight=True)
-            plt.show()
+        plt.autoscale(enable=True,axis = "y",tight=True)
+        plt.show()
         return collection
 
 def to_fit(x, a, b, c, d):
