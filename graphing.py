@@ -9,7 +9,7 @@ import math
 from utils import average_over
 from scipy.stats import linregress
 from scipy.optimize import curve_fit
-
+from outlier import outlierdet
 
 def parse_binary_llh(path):
     name = path.split('/')[-1][0:4]
@@ -36,7 +36,7 @@ def parse_binary_llh(path):
 
             pos_f = file.tell()
             collection.append(Sample_conv(name, time, pos, mat))
-
+            collection = outlierdet(collection,300,1)
         return collection
 
 def to_fit(x, a, b, c, d):
