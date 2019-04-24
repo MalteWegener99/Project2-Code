@@ -36,7 +36,10 @@ def parse_binary_llh(path):
 
             pos_f = file.tell()
             collection.append(Sample_conv(name, time, pos, mat))
-            collection = outlierdet(collection,300,1)
+            ncol = collection[1,2]
+            ncol = outlierdet(ncol,300,1)
+            collection[1] = ncol[0]
+            collection[2] = ncol[1]
         return collection
 
 def to_fit(x, a, b, c, d):
