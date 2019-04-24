@@ -36,22 +36,50 @@ def parse_binary_llh(path):
 
             pos_f = file.tell()
             collection.append(Sample_conv(name, time, pos, mat))
+            series = sorted(collection,key = lambda x: x.time)
+ 
 
+            times = []
+            locx = []
+            locy = []
+            locz = []
+            init_time = series[0].time
+            init_year = init_time//1000
+            init_days = init_time - init_year*1000
+            init_date = datetime.date.fromordinal(datetime.date(init_year,1,1).toordinal()+ init_days - 1)
+            
 
-        timecol = [s.time for s in collection]
-        posxcol = [s.pos[0] for s in collection]
-        posycol = [s.pos[1] for s in collection]
-        poszcol = [s.pos[2] for s in collection]
-        ncolx = np.column_stack((timecol,posxcol))
-        ncoly = np.column_stack((timecol,posycol))
-        ncolz = np.column_stack((timecol,poszcol))
-        ncolx = outlierdet(ncolx,300,1)
-        ncoly = outlierdet(ncoly,300,1)
-        ncolz = outlierdet(ncolz,300,1)
-        pos = np.column_stack((ncolx[:,1],ncoly[:,1],ncolz[:,1]))
-        collection.append(Sample_conv(name, time, pos, mat))
+            for i in range(len(series)):
 
+                ts = series[i].time
+                year = ts//1000
+                days = ts - year*1000
+                date = datetime.date.fromordinal(datetime.date(year,1,1).toordinal()+ days - 1)
+                time = (date - init_date).total_seconds()
+                times.append(time)
+                locx.append(deg(series[i].pos[0]))
+                locy.append(deg(series[i].pos[1]))
+                locz.append(deg(series[i].pos[2]))
+                
 
+            datax = np.column_stack((times,locx))
+            datay = np.column_stack((times,locy))
+            dataz = np.column_stack((times,locz))
+
+            newdatax = outlierdet(datax,300,1)
+            newdatay = outlierdet(datay,300,1)
+            newdataz = outlierdet(dataz,300,1)
+            # inl_x, inl_y, outl_x, outl_y = outlierdet(times,locations,0.45)
+            plt.subplot(3,1,1)
+            plt.scatter(newdatax[:,0],newdatax[:,1],s = 2)
+            # plt.scatter(times,d_ave)
+            plt.subplot(3,1,2)
+            plt.scatter(newdatay[:,0],newdatay[:,1],s = 2)
+            plt.subplot(3,1,3)
+            plt.scatter(newdataz[:,0],newdataz[:,1],s = 2)
+
+            plt.autoscale(enable=True,axis = "y",tight=True)
+            plt.show()
         return collection
 
 def to_fit(x, a, b, c, d):
@@ -121,3 +149,5 @@ def graph_series(series):
 
 if __name__ == "__main__":
     graph_series(parse_binary_llh(sys.argv[1]))
+    
+    
