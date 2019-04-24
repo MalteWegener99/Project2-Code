@@ -9,7 +9,7 @@ import math
 from utils import average_over
 from scipy.stats import linregress
 from scipy.optimize import curve_fit
-from outlier.py import outlierdet
+
 
 def parse_binary_llh(path):
     name = path.split('/')[-1][0:4]
