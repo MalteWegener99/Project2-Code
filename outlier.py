@@ -6,7 +6,6 @@ import glob
 import os
 from matplotlib import pyplot as plt
 from math import degrees as deg
-from sklearn.covariance import EllipticEnvelope
 
 
 
@@ -32,11 +31,6 @@ def outlierdet(data,n,sl):
 		if abs(d_ave[i] - d[i]) > (sl * sdev):
 			data = np.delete(data,(i - count), axis = 0)
 			count += 1
-
-		# if (i+1) == len(data[:,1]):
-		# 	break
-
-
 
 
 	return data
@@ -71,7 +65,7 @@ plt.subplot(2,1,1)
 plt.scatter(times,locations,s = 2)
 # plt.scatter(times,d_ave)
 plt.subplot(2,1,2)
-plt.scatter(newdata[:,0],newdata[:,1],s = 2)
+plt.scatter(newdata[:,0],newdata[:,1],s = 1)
 
 plt.autoscale(enable=True,axis = "y",tight=True)
 plt.show()
