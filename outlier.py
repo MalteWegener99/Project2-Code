@@ -1,4 +1,3 @@
-from graphing import parse_binary_llh
 import numpy as np
 import sys
 import datetime
@@ -6,7 +5,6 @@ import glob
 import os
 from matplotlib import pyplot as plt
 from math import degrees as deg
-from sklearn.covariance import EllipticEnvelope
 
 
 
@@ -26,6 +24,3 @@ def outlierdet(data,n,sl):
 			data = np.delete(data,(i - count), axis = 0)
 			count += 1
 	return data
-
-def clean_series(collection) -> list:
-	
