@@ -48,7 +48,7 @@ def parse_binary_llh(path):
         ncolx = outlierdet(ncolx,300,1)
         ncoly = outlierdet(ncoly,300,1)
         ncolz = outlierdet(ncolz,300,1)
-        pos = np.column_stack((ncolx[:,1],ncoly[:,1],ncol[:,1]))
+        pos = np.column_stack((ncolx[:,1],ncoly[:,1],ncolz[:,1]))
         collection.append(Sample_conv(name, time, pos, mat))
 
 
