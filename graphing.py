@@ -57,9 +57,9 @@ def parse_binary_llh(path):
                 date = datetime.date.fromordinal(datetime.date(year,1,1).toordinal()+ days - 1)
                 time = (date - init_date).total_seconds()
                 times.append(time)
-                locx.append(deg(series[i].pos[0]))
-                locy.append(deg(series[i].pos[1]))
-                locz.append(deg(series[i].pos[2]))
+                locx.append(degrees(series[i].pos[0]))
+                locy.append(degrees(series[i].pos[1]))
+                locz.append(degrees(series[i].pos[2]))
                 
 
             datax = np.column_stack((times,locx))
