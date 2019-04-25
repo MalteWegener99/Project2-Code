@@ -14,6 +14,9 @@ from scipy.interpolate import interp1d
 from scipy import signal
 from outlier import outlierdet
 import matplotlib
+import math
+from scipy.misc import imread
+import matplotlib.cbook as cbook
 
 f = 1 / 298.257223563
 e_2 = 2 * f - f**2
@@ -108,6 +111,12 @@ def great_circle_dist(pos1, pos2):
     
     return a * (d-f/4*((d+3*sinc)/(2*sin(d/2)**2)*(sin(phi1)-sin(phi2))**2+(d-3*sinc)/(1+cosc)*(sin(phi1)+sin(phi2))**2))
 
+def mercator_phi(phi):
+    return math.asin(math.tan(phi))
+
+def mercator_lam(lam):
+    return lam
+
 
 def analyse(file_name):
     #phi lam space
@@ -133,10 +142,8 @@ def analyse(file_name):
             lam0 = initial[i,1]
             phi1 = splines[i][0](t)
             lam1 = splines[i][1](t)
-            phiog = splines[0][0](t)-initial[0,0]
-            lamog = splines[0][1](t)-initial[0,1]
-            positions[i,0,t] = phi0 + factor*(phi1-phi0)#-phiog)
-            positions[i,1,t] = lam0 + factor*(lam1-lam0)#-lamog)
+            positions[i,0,t] = math.degrees(mercator_phi(phi0 + factor*(phi1-phi0)))
+            positions[i,1,t] = math.degrees(mercator_lam(lam0 + factor*(lam1-lam0)))
             speed[i,0,t] = splines[i][0].derivative()(t)
             speed[i,1,t] = splines[i][1].derivative()(t)
 
@@ -148,6 +155,8 @@ def analyse(file_name):
     speeds = [sqrt(speed[i,1,t]**2 + speed[i,0,t]**2) for i in range(0,speed.shape[0])]
     maxspeed = max(speeds)
     cmap = matplotlib.cm.get_cmap('rainbow')
+    datafile = cbook.get_sample_data('C:\\Users\\malte\\Desktop\\im.jpg')
+    img = imread(datafile)
     def animate(t):
         ax.clear()
         date = start + datetime.timedelta(days=t)
@@ -155,17 +164,17 @@ def analyse(file_name):
         ax.set_xlim([1.72,1.84])
         ax.triplot(positions[:,1,t],positions[:,0,t],simplices, linewidth=1.0)
         ax.triplot(vertices[:,1],vertices[:,0],simplices, linewidth=0.5)
-        print(speed[0,1,t], speed[0,0,t])
+        #ax.scatter([-180,-180,180,180],[-90,90,-90,90])
+        plt.imshow(img, zorder=0, extent=[-180, 180, -90, 90])
         for i in range(0,speed.shape[0]):
             mag = sqrt(speed[i,1,t]**2 + speed[i,0,t]**2)
             colr = cmap(mag/maxspeed)
             plt.quiver(positions[i,1,t],positions[i,0,t], speed[i,1,t], speed[i,0,t], colr, scale=0.8e-9)
         ax.axis('equal')
 
-    ani = animation.FuncAnimation(fig, animate, frames=range(1,rng-10,7), interval=100, save_count=500, blit=False)
+    ani = animation.FuncAnimation(fig, animate, frames=range(1,rng-10,7), interval=100000, save_count=500, blit=False)
     #ani.save("move.mp4")
     plt.show()
-        
 
     #cs = plt.contourf(xp.reshape(shape), yp.reshape(shape), cubic.reshape(shape),
                 #30, cmap='plasma')
