@@ -9,7 +9,9 @@ from matplotlib import pyplot as plt
 from math import degrees as deg
 
 def seismic_act(data,rng,sl):
-    comp_data = data
+    conv = np.ones(rng)/rng
+    comp_data = np.convolve(data[:,1],conv,mode = "same")
+    comp_data = np.column_stack((data[:,0],comp_data))
     events,diffs = [],[]
     for i in range(rng//2,len(comp_data[:,1]) - rng//2):
         avs = []
@@ -35,7 +37,7 @@ if __name__ == "__main__":
     path = "C:\\Users\\Wim Jodehl\\Desktop\\TAaS\\Project2-Code\\conv"
     os.chdir(path)
 
-    collection = parse_binary_llh(path + "\\MERS.tseries.neu")
+    collection = parse_binary_llh(path + "\\KUAL.tseries.neu")
     series = sorted(collection,key = lambda x: x.time)
 
     locations,times = [],[]
@@ -52,12 +54,12 @@ if __name__ == "__main__":
         date = datetime.date.fromordinal(datetime.date(year,1,1).toordinal()+ days - 1)
         time = (date - init_date).total_seconds()
         times.append(time)
-        locations.append(deg(series[i].pos[0]))
+        locations.append(deg(series[i].pos[1]))
 
     data = np.column_stack((times,locations))
 
     newdata = outlierdet(data,300,1)
-    events  = seismic_act(data,50,9)
+    events  = seismic_act(data,300,3)
 	
     plt.subplot(2,1,1)
     plt.scatter(times,locations,s = 0.1)
