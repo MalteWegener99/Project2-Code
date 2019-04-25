@@ -20,27 +20,30 @@ if __name__ == "__main__":
     file.write('name,lat,lon\n')
     for stat in stations:
         name, lon, lat = (stat.name, degrees(stat.pos[0]), degrees(stat.pos[1]))
-        print(name, lon, lat)
+        #print(name, lon, lat)
         file.write(','.join([name, str(lon), str(lat)]) + '\n')
     file.close()
     
     data = read_csv('tmp.csv')
-    print(type(data))
+    #print(type(data))
 
     earthquakes = read_csv('earthquakes.csv')
-    print(type(earthquakes))
+    #print(type(earthquakes))
 
     geoplotlib.dot(data)
     geoplotlib.labels(data, 'name', color=[0,0,255,255], font_size=10, anchor_x='center')
+
+    geoplotlib.kde(earthquakes, bw=5, cut_below=1e-4)
+    geoplotlib.set_smoothing(True)    
+    geoplotlib.dot(earthquakes)
+    geoplotlib.labels(earthquakes, 'name', color=[0,0,255,255], font_size=10, anchor_x='center')
+
     
-    #geoplotlib.dot(earthquakes)
-    #geoplotlib.labels(earthquakes, 'name', color=[0,0,255,255], font_size=10, anchor_x='center')
-    #geoplotlib.kde(earthquakes, bw=5, cut_below=1e-4)
-    #geoplotlib.set_smoothing(True)
     mags = np.genfromtxt("earthquakes.csv",skip_header=1,delimiter=',')[:,-1]
     print(mags)
     print(len(mags))
-    geoplotlib.markers(earthquakes, 'marker2.png', marker_preferred_size=32)
+    #geoplotlib.markers(earthquakes, 'm.png')
+    #geoplotlib.markers(earthquakes, 'm.png', f_tooltip=lambda r: r['name'])
     #for i in range(len(mags)):
     #    geoplotlib.markers(earthquakes, 'marker2.png')
     #    print(i)
