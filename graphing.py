@@ -76,7 +76,7 @@ def parse_binary_llh(path):
             times2 = []
             mindate = times[0]
             for elem in times:
-                times2.append((elem - mindate).days)
+                times2.append(elem - mindate)
 
             north = linregress(times2,newdatax[:, 1])
             east = linregress(times2, newdatay[:, 1])
