@@ -73,10 +73,14 @@ def parse_binary_llh(path):
             plps = [newdatax[:,1],newdatay[:,1],newdataz[:,1]]
             # inl_x, inl_y, outl_x, outl_y = outlierdet(times,locations,0.45)
 
+            times2 = []
             mindate = times[0]
-            north = linregress(times,newdatax[:, 1])
-            east = linregress(times, newdatay[:, 1])
-            up, away = curve_fit(to_fit, times,newdataz[:, 1])
+            for elem in times:
+                times2.append((elem - mindate).days)
+
+            north = linregress(times2,newdatax[:, 1])
+            east = linregress(times2, newdatay[:, 1])
+            up, away = curve_fit(to_fit, times2,newdataz[:, 1])
             print("{} mm/y".format(north[0]*365*1000))
             print("{} mm/y".format(east[0]*365*1000))
             print("{} mm/y".format(up[1]*365*1000))
@@ -99,9 +103,9 @@ def parse_binary_llh(path):
         # plt.subplot(3,1,3)
         # plt.scatter(newdataz[:,0],newdataz[:,1],s = 2)
         # plt.ylim(min(newdataz[:,1]),max(newdataz[:,1]))
-        gra[0].plot([mindate, times[-1]], [north[1], north[1] + north[0]*times[-1]])
-        gra[1].plot([mindate, times[-1]], [east[1], east[1] + east[0]*times[-1]])
-        gra[2].plot(times, list(map(lambda x: to_fit(x, up[0], up[1], up[2], up[3]), times)))
+        axarr[0].plot([mindate, times[-1]], [north[1], north[1] + north[0]*times2[-1]])
+        axarr[1].plot([mindate, times[-1]], [east[1], east[1] + east[0]*times2[-1]])
+        axarr[2].plot(times, list(map(lambda x: to_fit(x, up[0], up[1], up[2], up[3]), times2)))
         
         plt.show()
         return collection
