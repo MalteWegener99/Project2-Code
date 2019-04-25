@@ -70,7 +70,7 @@ def parse_binary_llh(path):
             newdatax = outlierdet(datax,300,1)
             newdatay = outlierdet(datay,300,1)
             newdataz = outlierdet(dataz,300,1)
-            plps = [newdatax[1],newdatay[1],newdataz[1]]
+            plps = [newdatax[:,1],newdatay[:,1],newdataz[:,1]]
             # inl_x, inl_y, outl_x, outl_y = outlierdet(times,locations,0.45)
 
             mindate = times[0]
