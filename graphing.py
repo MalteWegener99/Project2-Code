@@ -70,7 +70,23 @@ def parse_binary_llh(path):
             newdatax = outlierdet(datax,300,1)
             newdatay = outlierdet(datay,300,1)
             newdataz = outlierdet(dataz,300,1)
+            plps = [newdatax[1],newdatay[1],newdataz[1]]
             # inl_x, inl_y, outl_x, outl_y = outlierdet(times,locations,0.45)
+
+            mindate = times[0]
+            north = linregress(times,newdatax[:, 1])
+            east = linregress(times, newdatay[:, 1])
+            up, away = curve_fit(to_fit, times,newdataz[:, 1])
+            print("{} mm/y".format(north[0]*365*1000))
+            print("{} mm/y".format(east[0]*365*1000))
+            print("{} mm/y".format(up[1]*365*1000))
+            print(north)
+
+        for i in range(0,3):
+            gra[i].axhline(y=0, color='k')
+            gra[i].set_xlim([times[0], times[-1]])
+            gra[i].plot(times, plps[i], linewidth=0.5)
+
         plt.subplot(3,1,1)
         plt.scatter(newdatax[:,0],newdatax[:,1],s = 2)
         plt.ylim(min(newdatax[:,1]),max(newdatax[:,1]))
@@ -81,7 +97,9 @@ def parse_binary_llh(path):
         plt.subplot(3,1,3)
         plt.scatter(newdataz[:,0],newdataz[:,1],s = 2)
         plt.ylim(min(newdataz[:,1]),max(newdataz[:,1]))
-
+        gra[0].plot([mindate, times[-1]], [north[1], north[1] + north[0]*times[-1]])
+        gra[1].plot([mindate, times[-1]], [east[1], east[1] + east[0]*times[-1]])
+        gra[2].plot(times, list(map(lambda x: to_fit(x, up[0], up[1], up[2], up[3]), times)))
         plt.autoscale(enable=True,axis = "y",tight=True)
         plt.show()
         return collection
