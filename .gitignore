@@ -12,4 +12,5 @@ Assignment/bmps/pngs/*
 *tseries
 .vscode/*
 move.mp4
-*.pyc
+.vscode/settings.json
+.vscode/settings.json
