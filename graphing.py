@@ -48,19 +48,21 @@ def parse_binary_llh(path):
         init_year = init_time//1000
         init_days = init_time - init_year*1000
         init_date = datetime.date.fromordinal(datetime.date(init_year,1,1).toordinal()+ init_days - 1)
+        i = 0
 
-        for i in range(len(series)):
-            ts = series[i].time
-            year = ts//1000
-            days = ts - year*1000
+        for elem in series:
+            year = elem.time//1000
+            days = elem.time - year*1000
             date = datetime.date.fromordinal(datetime.date(year,1,1).toordinal()+ days - 1)
-            time = (date - init_date).total_seconds()
-            times.append(time)
-            locx.append(series[i].pos[0])
-            locy.append(series[i].pos[1])
-            locz.append(series[i].pos[2])
+            if not (datetime.date(1999,1,1) <= date < datetime.date(2012,1,1)):
+                continue
+            #time = (date - init_date).total_seconds()
+            times.append(date)
+            locx.append(elem.pos[0])
+            locy.append(elem.pos[1])
+            locz.append(elem.pos[2])
             
-
+    
         datax = np.column_stack((times,locx))
         datay = np.column_stack((times,locy))
         dataz = np.column_stack((times,locz))
@@ -68,22 +70,43 @@ def parse_binary_llh(path):
         newdatax = outlierdet(datax,300,1)
         newdatay = outlierdet(datay,300,1)
         newdataz = outlierdet(dataz,300,1)
+
+        ts2x = []
+        mindatex = newdatax[0,0]
+        for elem in newdatax[:,0]:
+            ts2x.append((elem - mindatex).days)
+        #ts2x = np.array(ts2x)
+        ts2y = []
+        mindatey = newdatay[0,0]
+        for elem in newdatay[:,0]:
+            ts2y.append((elem - mindatey).days)
+        #ts2y = np.array(ts2y)
+        ts2z = []
+        mindatez = newdataz[0,0]
+        for elem in newdataz[:,0]:
+            ts2z.append((elem - mindatez).days)
+        #ts2z = np.array(ts2z)
+        
         plps = [newdatax[:,1],newdatay[:,1],newdataz[:,1]]
         plts = [newdatax[:,0],newdatay[:,0],newdataz[:,0]]
+        
         plts2 = [newdatax[:,0]-len(newdatax)*newdatax[0,0],newdatay[:,0]-len(newdatay)*newdatay[1,0],newdataz[:,0]-len(newdataz)*newdataz[2,0]]
-        # inl_x, inl_y, outl_x, outl_y = outlierdet(times,locations,0.45)
+        inl_x, inl_y, outl_x, outl_y = outlierdet(times,locations,0.45)
+        print(len(ts2y))
+        print(ts2y.shape)
+        print(len(newdatay[:, 1]))
+        print(newdatay[:, 1].shape)
 
-
-
-        north = linregress(plts2[0],newdatax[:, 1])
-        print("north", north)
+        north = linregress(ts2x,newdatax[:, 1])
+        print("h")
         input()
-        east = linregress(plts2[1], newdatay[:, 1])
-        up, away = curve_fit(to_fit, plts2[2],newdataz[:, 1])
+        east = linregress(ts2y, newdatay[:, 1])
+        up, away = curve_fit(to_fit, ts2z,newdataz[:, 1])
         print("{} mm/y".format(north[0]*365*1000))
         print("{} mm/y".format(east[0]*365*1000))
         print("{} mm/y".format(up[1]*365*1000))
-        print(north)
+
+
         f, gra = plt.subplots(3, sharex=True)
         f.suptitle('lat, lon, heigth')
 
@@ -113,10 +136,11 @@ def parse_binary_llh(path):
         # plt.subplot(3,1,3)
         # plt.scatter(newdataz[:,0],newdataz[:,1],s = 2)
         # plt.ylim(min(newdataz[:,1]),max(newdataz[:,1]))
-        # gra[0].plot([plts[0][0], plts[0][-1]], [north[1], north[1] + north[0]*plts2[0][-1]])
-        # gra[1].plot([plts[1][0], plts[1][-1]], [east[1], east[1] + east[0]*plts2[1][-1]])
-        # gra[2].plot(plts[2][:], list(map(lambda x: to_fit(x, up[0], up[1], up[2], up[3]), plts2[2])))
-        
+        gra[0].plot([plts[0][0], plts[0][-1]], [north[1], north[1] + north[0]*ts2x[-1]])
+        gra[1].plot([plts[1][0], plts[1][-1]], [east[1], east[1] + east[0]*ts2y[-1]])
+        gra[2].plot(plts[2][:], list(map(lambda x: to_fit(x, up[0], up[1], up[2], up[3]),ts2z)))
+        print(ts2x[-1])
+        input()
         plt.show()
         return collection
 
@@ -160,6 +184,11 @@ def graph_series(series):
     
 
     north = linregress(times2, plotpos[:, 0])
+    print(len(times2))
+    print(times2)
+    print(len( plotpos[:, 0]))
+    print( plotpos[:, 0].shape)
+    print(plotpos[:, 0])
     east = linregress(times2, plotpos[:, 1])
     up, away = curve_fit(to_fit, times2, plotpos[:, 2])
     print("{} mm/y".format(north[0]*365*1000))
