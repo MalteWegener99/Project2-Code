@@ -13,6 +13,7 @@ import matplotlib.animation as animation
 import types
 
 
+
 f = 1 / 298.257223563
 e_2 = 2 * f - f**2
 a = 6378137.  # SMA

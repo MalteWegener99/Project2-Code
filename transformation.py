@@ -111,10 +111,10 @@ def great_circle_dist(pos1, pos2):
     
     return a * (d-f/4*((d+3*sinc)/(2*sin(d/2)**2)*(sin(phi1)-sin(phi2))**2+(d-3*sinc)/(1+cosc)*(sin(phi1)+sin(phi2))**2))
 
-def mercator_phi(phi):
+def mercator_phi(phi, lam, h):
     return math.asin(math.tan(phi))
 
-def mercator_lam(lam):
+def mercator_lam(phi, lam, h):
     return lam
 
 
