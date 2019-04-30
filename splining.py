@@ -13,6 +13,7 @@ import matplotlib.animation as animation
 import types
 
 
+
 f = 1 / 298.257223563
 e_2 = 2 * f - f**2
 a = 6378137.  # SMA
@@ -26,24 +27,23 @@ def get_date(elem):
 def make_spline(collection, start_date):
     collection = sorted(collection, key=lambda x: x.time)
     collection = average_over(collection, 7)
-    dates = []
-    phi = []
-    lam = []
-    h = []
+    dates = [-1]
+    phi = [collection[0].pos[0]]
+    lam = [collection[0].pos[1]]
+    h = [collection[0].pos[2]]
     for elem in collection:
         if (get_date(elem)-start_date).days >= 0:
             dates.append((get_date(elem)-start_date).days)
             phi.append(elem.pos[0])
             lam.append(elem.pos[1])
             h.append(elem.pos[2])
-
-    return (CubicSpline(dates, phi),CubicSpline(dates, lam), CubicSpline(dates, h), dates)
+    return (scipy.interpolate.interp1d(dates, phi),scipy.interpolate.interp1d(dates, lam), scipy.interpolate.interp1d(dates, h), dates)
 
 def load_set(file_name):
     stations_names = open(file_name).readlines()
     stations = dict()
     for name in stations_names:
-        set = sorted(parse_binary_llh(r'../conv/'+name[0:4]+'.tseries.neu'), key=lambda x: x.time)
+        set = sorted(parse_binary_llh(r'conv/'+name[0:4]+'.tseries.neu'), key=lambda x: x.time)
         if (get_date(set[-1])-get_date(set[0])).days >= 1000:
             print(name[0:4])
             print(get_date(set[-1]))
@@ -107,8 +107,8 @@ def analyse(file_name):
     splines = make_spline_set(data, start)
     initial = np.zeros((len(splines), 2))
     for i in range(initial.shape[0]):
-        initial[i,0] = splines[i][0](0)
-        initial[i,1] = splines[i][1](0)
+        initial[i,0] = splines[i][0](1)
+        initial[i,1] = splines[i][1](1)
     
     triangulation = Delaunay(initial)
     connections = []
@@ -123,7 +123,7 @@ def analyse(file_name):
         initial_dist.append(great_circle_dist(initial[connections[i,0],:],initial[connections[i,1],:]))
     initial_dist = np.array(initial_dist)
 
-    rng = (stop-start).days
+    rng = (stop-start).days-50
     strain = np.zeros((connections.shape[0],1,rng))
 
     for t in range(0,rng):
@@ -141,10 +141,13 @@ def analyse(file_name):
         phi2 = splines[connections[i,1]][0](t)
         lam2 = splines[connections[i,1]][1](t)
         positions.append([(phi1+phi2)/2,(lam1+lam2)/2])
+
     print(len(positions))
 
     positions = np.array(positions)
     shape = (500,500)
+    plt.plot(strain[0,0,:])
+    plt.show()
 
     xp, yp, cubic = gridder.interp(positions[:,1], positions[:,0], strain[:,0,-1], shape, algorithm='cubic', extrapolate=False)
 

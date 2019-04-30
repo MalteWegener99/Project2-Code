@@ -9,6 +9,7 @@ import math
 from utils import average_over
 from scipy.stats import linregress
 from scipy.optimize import curve_fit
+from outlier import outlierdet
 
 def parse_binary_llh(path):
     name = path.split('/')[-1][0:4]
@@ -61,7 +62,7 @@ def graph_series(series):
         if not (datetime.date(1999,1,1) <= date < datetime.date(2012,1,1)):
             continue
         times.append(date)
-        tmp = elem.pos - p0
+        tmp = p0 - elem.pos
         positions.append(np.matmul(mat, tmp))
         print(np.matmul(mat, tmp))
         pos = np.zeros([3])
@@ -86,7 +87,7 @@ def graph_series(series):
     print(north)
 
     f, axarr = plt.subplots(3, sharex=True)
-    f.suptitle('DAMn')
+    f.suptitle(sys.argv[1].split("/")[1][:4])
     # for i in range(0,3):
     #     axarr[i].axhline(y=0, color='k')
     #     axarr[i].set_xlim([times[0], times[-1]])
@@ -95,11 +96,19 @@ def graph_series(series):
     for i in range(0,3):
         axarr[i].axhline(y=0, color='k')
         axarr[i].set_xlim([times[0], times[-1]])
-        axarr[i].plot(times, plotpos[:, i], linewidth=0.5)
+        data = np.zeros([len(times), 2])
+        t = [t.toordinal() for t in times]
+        data[:, 0] = t
+        data[:, 1] = plotpos[:,1]
+        data = outlierdet(data, 3000, 1)
+        axarr[i].scatter(data[:, 0], data[:, 1], s=0.1)#, yerr=errors[:,i], linewidth=0.5, fmt='x', markersize=0.81)
 
     axarr[0].plot([mindate, times[-1]], [north[1], north[1] + north[0]*times2[-1]])
     axarr[1].plot([mindate, times[-1]], [east[1], east[1] + east[0]*times2[-1]])
     axarr[2].plot(times, list(map(lambda x: to_fit(x, up[0], up[1], up[2], up[3]), times2)))
+    axarr[0].set_ylabel("North (m)")
+    axarr[1].set_ylabel("East (m)")
+    axarr[2].set_ylabel("Up (m)")
 
     plt.show()
 
