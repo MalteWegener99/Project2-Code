@@ -7,27 +7,50 @@ import glob
 import os
 from matplotlib import pyplot as plt
 from math import degrees as deg
+from sklearn.cluster import AffinityPropagation
 
-def seismic_act(data,rng,sl):
-    conv = np.ones(rng)/rng
-    comp_data = np.convolve(data[:,1],conv,mode = "same")
-    comp_data = np.column_stack((data[:,0],comp_data))
-    events,diffs = [],[]
-    for i in range(rng//2,len(comp_data[:,1]) - rng//2):
-        avs = []
-        for j in range(1,rng//2):
-            avs.append(abs(comp_data[i,1] - comp_data[i-j,1]))
-            avs.append(abs(comp_data[i,1] - comp_data[i+j,1]))
-        diffs.append(sum(avs)/len(avs))
-    sdev = np.std(diffs)
-    mean = sum(diffs)/len(diffs)
-    for k,diff in enumerate(diffs):
-        if diff > (mean + sl*sdev) or diff < (mean - sl*sdev):
-            events.append(comp_data[k+rng//2,0])
+
+def convolute(d,n):
+    mask = np.ones(n)/n
+    conv = np.convolve(d,mask,mode = "same")
+    return conv
+
+
+# def seismic_act(data,n,sl):
+#     data = outlierdet(data,n,1)
+#     events,steps = [],[]
+#     d_conv = data[:,1]
+#     for i in range(n,len(d_conv)-n):
+#         steps.append(abs((d_conv[i] - d_conv[i-1])/(data[i,0] - data[i-1,0])))
+#     ave_step = sum(steps)/len(steps)
+#     std_step = np.std(steps)
+#     for i,step in enumerate(steps):
+#         if step > (ave_step + sl*std_step):
+#             ind = i + n
+#             events.append(data[ind,0])
+#     events = np.column_stack((events,np.ones(len(events))))
+#     print(events)
+#     clustering = AffinityPropagation(damping = 0.6).fit(events)
+#     quakes = clustering.cluster_centers_
+#     quakes = np.delete(quakes, 0 ,axis = 0)
+#     print(quakes)
+#     return quakes[:,0]
+
+def seismic_act(data,sl):
+    data = outlierdet(data,50,0.1)
+    events = []
+    d = data[:,1]
+    steps = d[1:] - d[:-1]
+    ratios = 1. * steps[1:] / steps[:-1]
+    jumps = ratios[1:] - ratios[:-1]
+    print(len(jumps))
+    print(len(d))
+    jump_ave = sum(jumps)/len(jumps)
+    jump_dev = np.std(jumps)
+    for i,jump in enumerate(jumps):
+        if abs(jump) > (jump_ave + sl*jump_dev):
+            events.append(data[i,0])
     return events
-    
-
-
 
         
     
@@ -59,7 +82,9 @@ if __name__ == "__main__":
     data = np.column_stack((times,locations))
 
     newdata = outlierdet(data,300,1)
-    events  = seismic_act(data,300,3)
+    events  = seismic_act(data,1)
+    
+    # print(events)
 	
     plt.subplot(2,1,1)
     plt.scatter(times,locations,s = 0.1)
@@ -69,9 +94,8 @@ if __name__ == "__main__":
     
     plt.subplot(2,1,2)
     plt.scatter(newdata[:,0],newdata[:,1],s = 0.4)
-    for event in events:
-        plt.axvline(x=event,color = "k")
+    # for event in events:
+        # plt.axvline(x=event,color = "k")
     plt.ylim(min(newdata[:,1]),max(newdata[:,1]))
-
-    
+ 
     plt.show()
