@@ -94,6 +94,7 @@ def parse_binary_llh(path):
         newdatax[:,1] = mat[0,0]*tmpx+mat[0,1]*tmpx+mat[0,2]*tmpx
         newdatay[:,1] = mat[1,0]*tmpy+mat[1,1]*tmpy+mat[1,2]*tmpy
         newdataz[:,1] = mat[2,0]*tmpz+mat[2,1]*tmpz+mat[2,2]*tmpz
+
         ts2x = []
         mindatex = newdatax[0,0]
         for elem in newdatax[:,0]:
