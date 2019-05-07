@@ -173,7 +173,7 @@ def analyse(file_name):
         ax.axis('equal')
 
     ani = animation.FuncAnimation(fig, animate, frames=range(1,rng-10,7), interval=100, save_count=500, blit=False)
-    ani.save("../fuckpython.mp4")
+    #ani.save("../fuckpython.mp4")
     plt.show()
 
     #cs = plt.contourf(xp.reshape(shape), yp.reshape(shape), cubic.reshape(shape),
