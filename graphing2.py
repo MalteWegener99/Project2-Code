@@ -58,16 +58,17 @@ def load_clean_set(path):
     data[:,2] = ns
     data[:,3] = ud
 
-    return outlierdet(data,300,1), baseline
+    return data, baseline
 
 def predict_plot(data, baseline):
 
     p0 = data[0,1:]
-    phi, lam, h = p0
+    lam, phi, h = p0
     p0 = llhtoxyz(p0)
+    print(np.linalg.norm(p0))
     mat = np.array([
         [-1*sin(phi), cos(phi), 0],
-        [-1*cos(phi)*sin(lam), -1*sin(phi)*sin(lam), cos(phi)],
+        [-1*cos(phi)*sin(lam), -1*sin(phi)*sin(lam), cos(lam)],
         [cos(phi)*cos(lam), sin(phi)*cos(lam), sin(lam)]
     ])
     f, axarr = plt.subplots(3, sharex=True)
@@ -84,4 +85,4 @@ def predict_plot(data, baseline):
 
 
 if __name__ == "__main__":
-    predict_plot(*load_clean_set(r"conv/KUAL.tseries.neu"))
+    predict_plot(*load_clean_set("conv/{}.tseries.neu".format(sys.argv[1])))
