@@ -1,4 +1,3 @@
-from graphing import parse_binary_llh
 import numpy as np
 import sys
 import datetime
@@ -7,8 +6,6 @@ import os
 from matplotlib import pyplot as plt
 from math import degrees as deg
 from sklearn.cluster import AffinityPropagation
-import matlab.engine
-import matlab
 
 
 

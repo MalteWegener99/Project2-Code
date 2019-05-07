@@ -4,7 +4,7 @@ import numpy as np
 import sys
 import struct
 import datetime
-from math import cos, sin
+from math import cos, sin, sqrt
 import math
 from utils import average_over
 from scipy.stats import linregress
@@ -12,6 +12,19 @@ from scipy.optimize import curve_fit
 from outlier import outlierdet
 from graphing import parse_binary_llh
 
+# WGS 84
+f = 1 / 298.257223563
+e_2 = 2 * f - f**2
+a = 6378137.  # SMA
+
+def llhtoxyz(pos):
+    phi, lam, h = pos
+    N = a/(sqrt(1-e_2*sin(phi)**2))
+    return np.array([
+        (N+h)*cos(phi)*cos(lam),
+        (N+h)*cos(phi)*sin(lam),
+        ((1-e_2)*N+h)*sin(phi)
+    ])
 
 def convert_to_date(elem):
     year = elem.time//1000
@@ -45,36 +58,30 @@ def load_clean_set(path):
     data[:,2] = ns
     data[:,3] = ud
 
-    data_plot = [0,0,0]
-    data_plot[0] = ew_data
-    data_plot[1] = ns_data
-    data_plot[2] = ud_data
-
-    return data_plot, baseline
-
-def change_p(pe, ni, s):
-    p = pe.copy()
-    p[ni] = s
-    return p
+    return outlierdet(data,300,1), baseline
 
 def predict_plot(data, baseline):
 
-    p0 = sum([np.array([data[0][x,1],data[1][x,1],data[2][x,1]]) for x in range(10)])/10
+    p0 = data[0,1:]
     phi, lam, h = p0
-    mat = np.array([[-1*sin(lam),cos(lam), 0.],
-                        [-1*cos(lam)*sin(phi), -1*sin(lam)*sin(phi), cos(phi)],
-                        [cos(lam)*cos(phi), sin(lam)*cos(phi), sin(phi)]]).T
+    p0 = llhtoxyz(p0)
+    mat = np.array([
+        [-1*sin(phi), cos(phi), 0],
+        [-1*cos(phi)*sin(lam), -1*sin(phi)*sin(lam), cos(phi)],
+        [cos(phi)*cos(lam), sin(phi)*cos(lam), sin(lam)]
+    ])
     f, axarr = plt.subplots(3, sharex=True)
+    plotpos = np.array([np.matmul(mat, llhtoxyz(data[i,1:])-p0) for i in range(data.shape[0])])
+    print(plotpos.shape)
+    print(data.shape)
     for i in range(0,3):
-
-        pos = [np.dot(mat[:,i], np.array()) for x in data[i][:,1]]
         axarr[i].axhline(y=0, color='k')
-        axarr[i].set_ylim([min(pos), max(pos)])
+        axarr[i].set_ylim([min(plotpos[:,i]), max(plotpos[:,i])])
         #axarr[i].set_xlim([baseline, baseline+datetime.timedelta(days=data[i][-1,0])])
-        axarr[i].scatter([baseline + datetime.timedelta(days=x) for x in data[i][:, 0]], pos, s=0.1)
+        axarr[i].scatter([baseline + datetime.timedelta(days=x) for x in data[:,0]], plotpos[:,i], s=0.1)
 
     plt.show()
 
 
 if __name__ == "__main__":
-    predict_plot(*load_clean_set(r"conv/PHKT.tseries.neu"))
+    predict_plot(*load_clean_set(r"conv/KUAL.tseries.neu"))
