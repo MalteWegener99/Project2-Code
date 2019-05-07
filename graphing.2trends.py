@@ -82,7 +82,6 @@ def graph_series(series):
     newdatax = outlierdet(datax,300,1)
     newdatay = outlierdet(datay,300,1)
     newdataz = outlierdet(dataz,300,1)
-
     p0 = np.array([datax[0,1],datay[0,1],dataz[0,1]])
     phi, lam, h = p0
 
@@ -123,6 +122,7 @@ def graph_series(series):
     for elem in newdataz[:,0]:
         ts2z.append(elem - mindatez)
     ts2z = np.array(ts2z)
+
     
     plps = [newdatax[:,1],newdatay[:,1],newdataz[:,1]]
     plts = [newdatax[:,0],newdatay[:,0],newdataz[:,0]]
@@ -169,52 +169,136 @@ def graph_series(series):
 
 
 #Without outlier detection
-    series = average_over(series, 7)
-    p0 = np.array(series[0].pos)
-    phi, lam, h = p0
-    mat = np.array([[-1*sin(lam),cos(lam), 0.],
-                        [-1*cos(lam)*sin(phi), -1*sin(lam)*sin(phi), cos(phi)],
-                        [cos(lam)*cos(phi), sin(lam)*cos(phi), sin(phi)]]).T
-    positions = []
-    errors = []
-    times = []
-    i = 0
-    for elem in series:
-        year = elem.time//1000
-        days = elem.time - year*1000
-        date = datetime.date.fromordinal(datetime.date(year, 1, 1).toordinal() + days - 1)
-        if not (datetime.date(1999,1,1) <= date < datetime.date(2012,1,1)):
-            continue
-        times.append(date)
-        tmp = elem.pos - p0
-        positions.append(np.matmul(mat, tmp))
-        #print(np.matmul(mat, tmp))
-        pos = np.zeros([3])
-        errors.append(elem.err)
+                        # series = average_over(series, 7)
+                        # p0 = np.array(series[0].pos)
+                        # phi, lam, h = p0
+                        # mat = np.array([[-1*sin(lam),cos(lam), 0.],
+                        #                     [-1*cos(lam)*sin(phi), -1*sin(lam)*sin(phi), cos(phi)],
+                        #                     [cos(lam)*cos(phi), sin(lam)*cos(phi), sin(phi)]]).T
+                        # positions = []
+                        # errors = []
+                        # times = []
+                        # i = 0
+                        # for elem in series:
+                        #     year = elem.time//1000
+                        #     days = elem.time - year*1000
+                        #     date = datetime.date.fromordinal(datetime.date(year, 1, 1).toordinal() + days - 1)
+                        #     if not (datetime.date(1999,1,1) <= date < datetime.date(2012,1,1)):
+                        #         continue
+                        #     times.append(date)
+                        #     tmp = elem.pos - p0
+                        #     positions.append(np.matmul(mat, tmp))
+                        #     #print(np.matmul(mat, tmp))
+                        #     pos = np.zeros([3])
+                        #     errors.append(elem.err)
 
-    plotpos = np.array(positions)
-    ploterr = np.array(errors)
-    errors = np.array(errors)
-    # print(plotpos[:,2])
-    times2 = []
-    mindate = times[0]
-    for elem in times:
-        times2.append((elem - mindate).days)
+                        # plotpos = np.array(positions)
+                        # ploterr = np.array(errors)
+                        # errors = np.array(errors)
+                        # # print(plotpos[:,2])
+                        # times2 = []
+                        # mindate = times[0]
+                        # for elem in times:
+                        #     times2.append((elem - mindate).days)
+
+                        # north = linregress(times2, plotpos[:, 0])
+                        # east = linregress(times2, plotpos[:, 1])
+                        # up, away = curve_fit(to_fit, times2, plotpos[:, 2])
+                        # print("{} mm/y".format(north[0]*365*1000))
+                        # print("{} mm/y".format(east[0]*365*1000))
+                        # print("{} mm/y".format(up[1]*365*1000))
+                        # print(north)
+                        # print(east)
+    tmpxx = []
+    tmpyy = []
+    tmpzz = []
+    for elem in datax[:,1]:
+        tmpxx.append(elem - p0[0])
+    tmpxx = np.array(tmpxx)
+    for elem in datay[:,1]:
+        tmpyy.append(elem - p0[1])
+    tmpyy = np.array(tmpyy)
+    for elem in dataz[:,1]:
+        tmpzz.append(elem - p0[2])
+    tmpzz = np.array(tmpzz)
     
+    datax[:,1] = mat[0,0]*tmpxx+mat[0,1]*tmpxx+mat[0,2]*tmpxx
+    datay[:,1] = mat[1,0]*tmpyy+mat[1,1]*tmpyy+mat[1,2]*tmpyy
+    dataz[:,1] = mat[2,0]*tmpzz+mat[2,1]*tmpzz+mat[2,2]*tmpzz
 
-    north = linregress(times2, plotpos[:, 0])
-    east = linregress(times2, plotpos[:, 1])
-    up, away = curve_fit(to_fit, times2, plotpos[:, 2])
+    
+    ts2xx = []
+    mindatexx = datax[0,0]
+    for elem in datax[:,0]:
+        ts2xx.append(elem - mindatexx)
+    ts2xx = np.array(ts2xx)
+    ts2yy = []
+    mindateyy = datay[0,0]
+    for elem in datay[:,0]:
+        ts2yy.append(elem - mindateyy)
+    ts2yy = np.array(ts2yy)
+    ts2zz = []
+    mindatezz = dataz[0,0]
+    for elem in dataz[:,0]:
+        ts2zz.append(elem - mindatezz)
+    ts2zz = np.array(ts2zz)
+
+    
+    plps1 = [datax[:,1],datay[:,1],dataz[:,1]]
+    plts1 = [datax[:,0],datay[:,0],dataz[:,0]]
+    
+    ts22 = [ts2xx,ts2yy,ts2zz]
+
+    # placexx  = 0 
+    # placeyy = 0
+    # pxx = []
+    # pyy = [] 
+    # devxx = st.stdev(datax[:,1])
+    # for i in range(2,len(datax[:,1])-1):
+    #     a = datax[i, 1]
+    #     b = datax[i+1, 1]
+    #     s = abs(b-a)
+    #     if s > devxx:
+    #         pxx.append(i)
+    # placexx = max(pxx)
+    # devyy = st.stdev(datay[:,1])
+    # for i in range(2,len(datay[:,1])-1):
+    #     a = datay[i, 1]
+    #     b = datay[i+1, 1]
+    #     s = abs(b-a)
+    #     if s > devyy:
+    #         pyy.append(i)
+    # placeyy = max(pyy)
+    # print(pxx,pyy)
+
+
+
+    # north11 = linregress(ts2xx[:placexx+1],datax[:placexx+1, 1])
+    # north22 = linregress(ts2xx[placexx+1:],datax[placexx+1:, 1])
+    # east11 = linregress(ts2yy[:placeyy+1],datay[:placeyy+1, 1])
+    # east22 = linregress(ts2yy[placeyy+1:],datay[placeyy+1:, 1])
+    # up11, away11 = curve_fit(to_fit2, ts2zz,dataz[:, 1])
+    # print("{} mm/y".format(north11[0]*365*1000))
+    # print("{} mm/y".format(north22[0]*365*1000))
+    # print("{} mm/y".format(east11[0]*365*1000))
+    # print("{} mm/y".format(east22[0]*365*1000))
+    # print("{} mm/y".format(up11[1]*365*1000))
+    # print(north11)
+    north = linregress(ts2xx,datax[:,1])
+    east = linregress(ts2yy,datay[:,1])
+    up, away = curve_fit(to_fit, ts2zz, dataz[:,1])
     print("{} mm/y".format(north[0]*365*1000))
     print("{} mm/y".format(east[0]*365*1000))
     print("{} mm/y".format(up[1]*365*1000))
     print(north)
     print(east)
-
 #Graphs
 
     f, axarr = plt.subplots(3,2)
     f.suptitle('With outlier vs without')
+
+                                #with:
+
     axarr[0,0].axhline(y=0, color='k')
     axarr[0,0].scatter([x/31536000 + 2001 for x in newdatax[:,0]],newdatax[:,1],s = 2)
     axarr[0,0].set_ylim(min(newdatax[:,1]),max(newdatax[:,1]))
@@ -229,26 +313,61 @@ def graph_series(series):
     axarr[1,0].set_ylim(min(newdatay[:,1]),max(newdatay[:,1]))
     axarr[1,0].set_ylabel('Displacement')
     #axarr[1,0].set_xlabel('Years')
-    axarr[1,0].plot([mindatey/31536000 + 2001, plts[1][placey]/31536000 + 2001], [east1[1], east1[1] + east1[0]*ts2[1][placey]], color='r')
-    axarr[1,0].plot([plts[1][placey+1]/31536000 + 2001, plts[1][-1]/31536000 + 2001], [east2[1] +east2[0]*ts2[1][placey+1], east2[1] + east2[0]*ts2[1][-1]], color='m')
+    axarr[1,0].plot([mindatey/31536000 + 2001, plts[1][placey]/31536000 + 2001], [east1[1], east1[1] + east1[0]*ts2[1][placey]], color='r', label= "{} mm/y".format(east1[0]*365*1000))
+    axarr[1,0].plot([plts[1][placey+1]/31536000 + 2001, plts[1][-1]/31536000 + 2001], [east2[1] +east2[0]*ts2[1][placey+1], east2[1] + east2[0]*ts2[1][-1]], color='m', label= "{} mm/y".format(east2[0]*365*1000))
+    axarr[1,0].legend(loc="lower right")
 
     axarr[2,0].axhline(y=0, color='k')
     axarr[2,0].scatter([x/31536000 + 2001 for x in newdataz[:,0]],newdataz[:,1],s = 2)
     axarr[2,0].set_ylim(min(newdataz[:,1]),max(newdataz[:,1]))
     axarr[2,0].set_ylabel('Displacement')
     #axarr[2,0].set_xlabel('Years')
-    axarr[2,0].plot([x/31536000 + 2001 for x in plts[2]], [to_fit2( x, up1[0], up1[1], up1[2], up1[3]) for x in ts2z], color='r')
+    axarr[2,0].plot([x/31536000 + 2001 for x in plts[2]], [to_fit2( x, up1[0], up1[1], up1[2], up1[3]) for x in ts2z], color='r', label= "{} mm/y".format(up1[1]*365*1000))
+    axarr[2,0].legend(loc="lower right") 
 
-    for i in range(0,3):
-        axarr[i,1].axhline(y=0, color='k')
-        axarr[i,1].set_xlim([times[0], times[-1]])
-        axarr[i,1].plot(times, plotpos[:, i], linewidth=0.5)
-        axarr[i,0].set_ylabel('Displacement')
-        axarr[i,0].set_xlabel('Years')
+                             #without
 
-    axarr[0,1].plot([mindate, times[-1]], [north[1], north[1] + north[0]*times2[-1]])
-    axarr[1,1].plot([mindate, times[-1]], [east[1], east[1] + east[0]*times2[-1]])
-    axarr[2,1].plot(times, list(map(lambda x: to_fit(x, up[0], up[1], up[2], up[3]), times2)))
+    axarr[0,1].axhline(y=0, color='k')
+    axarr[0,1].scatter([x/31536000 + 2001 for x in datax[:,0]],datax[:,1],s = 2)
+    axarr[0,1].set_ylim(min(datax[:,1]),max(datax[:,1]))
+    axarr[0,1].set_ylabel('Displacement')
+    #axarr[0,0].set_xlabel('Years')
+    axarr[0,1].plot([mindatexx/31536000 + 2001, plts1[0][-1]/31536000 + 2001], [north[1], north[1] + north[0]*ts22[0][-1]],color='r', label= "{} mm/y".format(north[0]*365*1000))
+    #axarr[0,0].plot([plts1[0][placexx+1]/31536000 + 2001, plts1[0][-1]/31536000 + 2001], [north22[1] +north22[0]*ts22[0][placexx+1], north22[1] + north22[0]*ts22[0][-1]], color='m', label="{} mm/y".format(north22[0]*365*1000))
+    axarr[0,1].legend(loc="lower right")
+
+    axarr[1,1].axhline(y=0, color='k')
+    axarr[1,1].scatter([x/31536000 + 2001 for x in datay[:,0]],datay[:,1],s = 2)
+    axarr[1,1].set_ylim(min(datay[:,1]),max(datay[:,1]))
+    axarr[1,1].set_ylabel('Displacement')
+    #axarr[1,0].set_xlabel('Years')
+    axarr[1,1].plot([mindateyy/31536000 + 2001, plts1[1][-1]/31536000 + 2001], [east[1], east[1] + east[0]*ts22[1][-1]], color='r', label= "{} mm/y".format(east[0]*365*1000))
+    #axarr[1,0].plot([plts1[1][placeyy+1]/31536000 + 2001, plts1[1][-1]/31536000 + 2001], [east22[1] +east22[0]*ts22[1][placeyy+1], east22[1] + east22[0]*ts22[1][-1]], color='m', label= "{} mm/y".format(east22[0]*365*1000))
+    axarr[1,1].legend(loc="lower right")
+
+    axarr[2,1].axhline(y=0, color='k')
+    axarr[2,1].scatter([x/31536000 + 2001 for x in dataz[:,0]],dataz[:,1],s = 2)
+    axarr[2,1].set_ylim(min(dataz[:,1]),max(dataz[:,1]))
+    axarr[2,1].set_ylabel('Displacement')
+    #axarr[2,0].set_xlabel('Years')
+    axarr[2,1].plot([x/31536000 + 2001 for x in plts1[2]], [to_fit2( x, up[0], up[1], up[2], up[3]) for x in ts2zz], color='r', label= "{} mm/y".format(up[1]*365*1000))
+    axarr[2,1].legend(loc="lower right")
+
+
+
+
+
+
+                    # for i in range(0,3):
+                    #     axarr[i,1].axhline(y=0, color='k')
+                    #     axarr[i,1].set_xlim([times[0], times[-1]])
+                    #     axarr[i,1].plot(times, plotpos[:, i], linewidth=0.5)
+                    #     axarr[i,0].set_ylabel('Displacement')
+                    #     axarr[i,0].set_xlabel('Years')
+
+                    # axarr[0,1].plot([mindate, times[-1]], [north[1], north[1] + north[0]*times2[-1]])
+                    # axarr[1,1].plot([mindate, times[-1]], [east[1], east[1] + east[0]*times2[-1]])
+                    # axarr[2,1].plot(times, list(map(lambda x: to_fit(x, up[0], up[1], up[2], up[3]), times2)))
 
     plt.show()
 
