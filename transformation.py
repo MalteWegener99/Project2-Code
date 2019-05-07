@@ -111,10 +111,10 @@ def great_circle_dist(pos1, pos2):
     
     return a * (d-f/4*((d+3*sinc)/(2*sin(d/2)**2)*(sin(phi1)-sin(phi2))**2+(d-3*sinc)/(1+cosc)*(sin(phi1)+sin(phi2))**2))
 
-def mercator_phi(phi, lam, h):
-    return math.asin(math.tan(phi))
+def mercator_phi(phi):
+    return phi#math.asin(math.tan(phi))
 
-def mercator_lam(phi, lam, h):
+def mercator_lam(lam):
     return lam
 
 
@@ -155,25 +155,22 @@ def analyse(file_name):
     speeds = [sqrt(speed[i,1,t]**2 + speed[i,0,t]**2) for i in range(0,speed.shape[0])]
     maxspeed = max(speeds)
     cmap = matplotlib.cm.get_cmap('rainbow')
-    datafile = cbook.get_sample_data('C:\\Users\\malte\\Desktop\\im.jpg')
-    img = imread(datafile)
     def animate(t):
+        print(t)
         ax.clear()
         date = start + datetime.timedelta(days=t)
         ax.set_title(date)
         ax.set_xlim([1.72,1.84])
         ax.triplot(positions[:,1,t],positions[:,0,t],simplices, linewidth=1.0)
-        ax.triplot(vertices[:,1],vertices[:,0],simplices, linewidth=0.5)
-        #ax.scatter([-180,-180,180,180],[-90,90,-90,90])
-        plt.imshow(img, zorder=0, extent=[-180, 180, -90, 90])
+        ax.triplot(positions[:,1,1],positions[:,0,1],simplices, linewidth=0.5)
         for i in range(0,speed.shape[0]):
             mag = sqrt(speed[i,1,t]**2 + speed[i,0,t]**2)
             colr = cmap(mag/maxspeed)
             plt.quiver(positions[i,1,t],positions[i,0,t], speed[i,1,t], speed[i,0,t], colr, scale=0.8e-9)
         ax.axis('equal')
 
-    ani = animation.FuncAnimation(fig, animate, frames=range(1,rng-10,7), interval=100000, save_count=500, blit=False)
-    #ani.save("move.mp4")
+    ani = animation.FuncAnimation(fig, animate, frames=range(1,rng-10,7), interval=100, save_count=500, blit=False)
+    ani.save("../fuckpython.mp4")
     plt.show()
 
     #cs = plt.contourf(xp.reshape(shape), yp.reshape(shape), cubic.reshape(shape),
