@@ -58,7 +58,7 @@ def load_clean_set(path):
     data[:,2] = ns
     data[:,3] = ud
 
-    return data, baseline
+    return outlierdet(data, 300, 2), baseline
 
 def predict_plot(data, baseline):
 
