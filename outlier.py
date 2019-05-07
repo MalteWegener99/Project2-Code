@@ -83,27 +83,27 @@ if __name__ == "__main__":
 
     
     
-    plt.subplot(3,2,1)
+    plt.subplot(3,2,6)
     plt.scatter(times,locationsx,s = 0.1)
     plt.ylim(min(locationsx),max(locationsx))
 
-    plt.subplot(3,2,2)
+    plt.subplot(3,2,4)
     plt.scatter(times,locationsy,s = 0.1)
     plt.ylim(min(locationsy),max(locationsy))
     
-    plt.subplot(3,2,3)
+    plt.subplot(3,2,2)
     plt.scatter(times,locationsz,s = 0.1)
     plt.ylim(min(locationsz),max(locationsz))
 
-    plt.subplot(3,2,4)
+    plt.subplot(3,2,5)
     plt.scatter(newdata[:,0],newdata[:,1],s = 0.4)
     plt.ylim(min(newdata[:,1]),max(newdata[:,1]))
 
-    plt.subplot(3,2,5)
+    plt.subplot(3,2,3)
     plt.scatter(newdata[:,0],newdata[:,2],s = 0.4)
     plt.ylim(min(newdata[:,2]),max(newdata[:,2]))
 
-    plt.subplot(3,2,6)
+    plt.subplot(3,2,1)
     plt.scatter(newdata[:,0],newdata[:,3],s = 0.4)
     plt.ylim(min(newdata[:,3]),max(newdata[:,3]))
 
