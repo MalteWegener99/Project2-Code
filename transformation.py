@@ -112,7 +112,7 @@ def great_circle_dist(pos1, pos2):
     return a * (d-f/4*((d+3*sinc)/(2*sin(d/2)**2)*(sin(phi1)-sin(phi2))**2+(d-3*sinc)/(1+cosc)*(sin(phi1)+sin(phi2))**2))
 
 def mercator_phi(phi):
-    return phi#math.asin(math.tan(phi))
+    return math.asin(math.tan(phi))
 
 def mercator_lam(lam):
     return lam
@@ -160,7 +160,10 @@ def analyse(file_name):
         ax.clear()
         date = start + datetime.timedelta(days=t)
         ax.set_title(date)
-        ax.set_xlim([1.72,1.84])
+        ax.set_xlim([98, 106])
+        ax.set_xlabel("longitude")
+        ax.set_ylabel("latitude")
+        ax.grid()
         ax.triplot(positions[:,1,t],positions[:,0,t],simplices, linewidth=1.0)
         ax.triplot(positions[:,1,1],positions[:,0,1],simplices, linewidth=0.5)
         for i in range(0,speed.shape[0]):
@@ -170,7 +173,7 @@ def analyse(file_name):
         ax.axis('equal')
 
     ani = animation.FuncAnimation(fig, animate, frames=range(1,rng-10,7), interval=100, save_count=500, blit=False)
-    ani.save("../fuckpython.mp4")
+    #ani.save("../fuckpython.mp4")
     plt.show()
 
     #cs = plt.contourf(xp.reshape(shape), yp.reshape(shape), cubic.reshape(shape),

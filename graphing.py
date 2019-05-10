@@ -101,7 +101,7 @@ def graph_series(series):
         data[:, 0] = t
         data[:, 1] = plotpos[:,1]
         data = outlierdet(data, 3000, 1)
-        axarr[i].scatter(data[:, 0], data[:, 1], s=0.1)#, yerr=errors[:,i], linewidth=0.5, fmt='x', markersize=0.81)
+        axarr[i].scatter(data[:, 0], data[:, i], s=0.1)#, yerr=errors[:,i], linewidth=0.5, fmt='x', markersize=0.81)
 
     axarr[0].plot([mindate, times[-1]], [north[1], north[1] + north[0]*times2[-1]])
     axarr[1].plot([mindate, times[-1]], [east[1], east[1] + east[0]*times2[-1]])
