@@ -9,7 +9,6 @@ import math
 from utils import average_over
 from scipy.stats import linregress
 from scipy.optimize import curve_fit
-#from outlier import outlierdet
 
 def parse_binary_llh(path):
     name = path.split('/')[-1][0:4]
@@ -106,9 +105,6 @@ def graph_series(series):
     axarr[0].plot([mindate, times[-1]], [north[1], north[1] + north[0]*times2[-1]])
     axarr[1].plot([mindate, times[-1]], [east[1], east[1] + east[0]*times2[-1]])
     axarr[2].plot(times, list(map(lambda x: to_fit(x, up[0], up[1], up[2], up[3]), times2)))
-    axarr[0].set_ylabel("North (m)")
-    axarr[1].set_ylabel("East (m)")
-    axarr[2].set_ylabel("Up (m)")
 
     plt.show()
 

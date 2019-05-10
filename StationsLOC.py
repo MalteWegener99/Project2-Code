@@ -37,12 +37,12 @@ with open('SLOCs.csv', mode='w', newline='') as SLOCs:
 
 #plot stations
 Plotdata = read_csv('SLOCs.csv')
+gp.set_bbox(BoundingBox(north=9, west=110, south=1, east=95))
 gp.dot(Plotdata, color='red', point_size=2)
-#optional: gp.labels(Plotdata, 'name', color='black', font_size=8, anchor_x='center')
+gp.labels(Plotdata, 'name', color='black', font_size=8, anchor_x='center')
 gp.tiles_provider('positron')
 
 gp.show()
-
 
 
 'https://maps-for-free.com/layer/relief/z{Z}/row{Y}/{Z}_{X}-{Y}.jpg'
