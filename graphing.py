@@ -10,7 +10,7 @@ from math import degrees as deg
 from utils import average_over
 from scipy.stats import linregress
 from scipy.optimize import curve_fit
-#from outlier import outlierdet
+from outlier import outlierdet
 
 def parse_binary_llh(path):
     name = path.split('/')[-1][0:4]

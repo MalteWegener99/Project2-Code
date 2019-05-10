@@ -30,6 +30,7 @@ if __name__ == "__main__":
     earthquakes = read_csv('earthquakes.csv')
     #print(type(earthquakes))
 
+
     geoplotlib.dot(data)
     geoplotlib.labels(data, 'name', color=[0,0,255,255], font_size=10, anchor_x='center')
 
