@@ -163,7 +163,7 @@ def plot_rel(s_name):
 #Trans_Avg_Velo_csv()
 """MAIN CODE"""
 fname = 'SLOCs.csv'
-s_name = 'SAMP'
+s_name = str(sys.argv[1])
 #print(Trans_Velo_csv(fname))
 #Trans_Avg_Velo_csv()
 plot_rel(s_name)
