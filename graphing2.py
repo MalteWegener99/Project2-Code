@@ -46,40 +46,84 @@ def load_clean_set(path):
     data_set = [date_relative_days(x,baseline) for x in data_set]
     #manufacture time series
     size = len(data_set)
-    data = np.zeros([size,4])
+    data = np.zeros([size,7])
 
     days = [x.time for x in data_set]
     ew = np.array([x.pos[0] for x in data_set])
     ns = np.array([x.pos[1] for x in data_set])
     ud = np.array([x.pos[2] for x in data_set])
+    ewe = np.array([x.err[0] for x in data_set])
+    nse = np.array([x.err[1] for x in data_set])
+    ude = np.array([x.err[2] for x in data_set])
 
     data[:,0] = days
     data[:,1] = ew
     data[:,2] = ns
     data[:,3] = ud
+    data[:,4] = ewe
+    data[:,5] = nse
+    data[:,6] = ude
 
-    return outlierdet(data, 300, 2), baseline
+    return outlierdet(data, 300, 3), baseline
+
+def to_fit(x, a, b, c, d):
+    return a + b*x + c*np.sin(2*math.pi/365 * x + d)
+
+def to_fit2(x, a, b, c, d, e):
+    x = x-a
+    return b*x*np.log(c*x)-x*d+e
 
 def predict_plot(data, baseline):
 
-    p0 = data[0,1:]
+    p0 = data[0,1:4]
+    print(p0)
     lam, phi, h = p0
     p0 = llhtoxyz(p0)
-    print(np.linalg.norm(p0))
     mat = np.array([
         [-1*sin(phi), cos(phi), 0],
         [-1*cos(phi)*sin(lam), -1*sin(phi)*sin(lam), cos(lam)],
         [cos(phi)*cos(lam), sin(phi)*cos(lam), sin(lam)]
     ])
     f, axarr = plt.subplots(3, sharex=True)
-    plotpos = np.array([np.matmul(mat, llhtoxyz(data[i,1:])-p0) for i in range(data.shape[0])])
-    print(plotpos.shape)
-    print(data.shape)
-    for i in range(0,3):
+    plotpos = np.array([np.matmul(mat, llhtoxyz(data[i,1:4])-p0) for i in range(data.shape[0])])
+
+    #make subseries for plotting
+    split = (datetime.date(2004,12,26)-baseline).days
+    splitindex = 0
+    for i in range(data.shape[0]):
+        if data[i,0] < split:
+            splitindex = i
+        else:
+            break
+    # Plotting of the actual stuff
+    f.suptitle(sys.argv[1])
+    axarr[0].set_title("East [m]")
+    axarr[1].set_title("North [m]")
+    axarr[2].set_title("Up [m]")
+    for i in range(0,2):
+        predict = linregress(data[:splitindex,0], plotpos[:splitindex,i])
+        print("Before:", predict[0]*365*1000, "mm/yr")
+        predict2, away = curve_fit(to_fit2, data[:splitindex,0], plotpos[:splitindex,i])
+        print("After:", predict2[0]*365*1000, "mm/yr")
         axarr[i].axhline(y=0, color='k')
         axarr[i].set_ylim([min(plotpos[:,i]), max(plotpos[:,i])])
+        axarr[i].axvline(x=datetime.datetime(2004,12,26))
         #axarr[i].set_xlim([baseline, baseline+datetime.timedelta(days=data[i][-1,0])])
-        axarr[i].scatter([baseline + datetime.timedelta(days=x) for x in data[:,0]], plotpos[:,i], s=0.1)
+        axarr[i].plot([baseline + datetime.timedelta(days=data[0,0]), baseline + datetime.timedelta(days=data[splitindex-1,0])], [predict[1], predict[1]+predict[0]*(data[splitindex-1,0]-data[0,0])], 'r--')
+        axarr[i].plot([baseline + datetime.timedelta(days=x) for x in np.arange(data[splitindex+1,0], data[-1,0], 1)], [to_fit2(x, *predict2) for x in np.arange(data[splitindex+1,0], data[-1,0], 1)], 'r--')
+        axarr[i].errorbar([baseline + datetime.timedelta(days=x) for x in data[:,0]], plotpos[:,i], yerr=10*data[:, 4+i], fmt='x', elinewidth=0.1, markersize=0.5)
+        #axarr[i].scatter([baseline + datetime.timedelta(days=x) for x in data[:,0]], plotpos[:,i], s=0.1)
+    
+    for i in range(2,3):
+        up, away = curve_fit(to_fit, data[:splitindex,0], plotpos[:splitindex,i])
+        up2, away = curve_fit(to_fit, data[splitindex+1:,0], plotpos[splitindex+1:,i])
+        axarr[i].axhline(y=0, color='k')
+        axarr[i].set_ylim([min(plotpos[:,i]), max(plotpos[:,i])])
+        axarr[i].axvline(x=datetime.datetime(2004,12,26))
+        #axarr[i].set_xlim([baseline, baseline+datetime.timedelta(days=data[i][-1,0])])
+        axarr[i].plot([baseline + datetime.timedelta(days=x) for x in np.arange(data[0,0], data[splitindex,0], 1)], [to_fit(x, *up) for x in np.arange(data[0,0], data[splitindex,0], 1)], 'r--')
+        axarr[i].plot([baseline + datetime.timedelta(days=x) for x in np.arange(data[splitindex+1,0], data[-1,0], 1)], [to_fit(x, *up2) for x in np.arange(data[splitindex+1,0], data[-1,0], 1)], 'r--')
+        axarr[i].errorbar([baseline + datetime.timedelta(days=x) for x in data[:,0]], plotpos[:,i], yerr=10*data[:, 4+i], fmt='x', elinewidth=0.1, markersize=0.5)
 
     plt.show()
 
