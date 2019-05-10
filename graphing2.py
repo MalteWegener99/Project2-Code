@@ -37,7 +37,7 @@ def date_relative_days(elem, baseline):
     elem.time = (elem.time-baseline).days
     return elem
 
-def load_clean_set(path):
+def load_clean_set(path, clean):
     data_set = parse_binary_llh(path)
     data_set = [convert_to_date(x) for x in data_set]
     data_set = list(sorted(data_set, key=lambda x: x.time))
@@ -58,8 +58,8 @@ def load_clean_set(path):
     data[:,2] = ns
     data[:,3] = ud
 
-    return outlierdet(data, 300, 2), baseline
-
+    return (outlierdet(data, 300, 2) if clean else data), baseline
+#n = 50, alpha = 
 def predict_plot(data, baseline):
 
     p0 = data[0,1:]
@@ -72,6 +72,7 @@ def predict_plot(data, baseline):
         [cos(phi)*cos(lam), sin(phi)*cos(lam), sin(lam)]
     ])
     f, axarr = plt.subplots(3, sharex=True)
+
     plotpos = np.array([np.matmul(mat, llhtoxyz(data[i,1:])-p0) for i in range(data.shape[0])])
     print(plotpos.shape)
     print(data.shape)
@@ -85,4 +86,7 @@ def predict_plot(data, baseline):
 
 
 if __name__ == "__main__":
-    predict_plot(*load_clean_set("conv/{}.tseries.neu".format(sys.argv[1])))
+    predict_plot(*load_clean_set("conv/{}.tseries.neu".format(sys.argv[1]), True))
+    predict_plot(*load_clean_set("conv/{}.tseries.neu".format(sys.argv[1]), False))
+    print(data)
+    print(np.matrix.size(data))
