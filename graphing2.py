@@ -36,6 +36,8 @@ def convert_to_date(elem):
 def date_relative_days(elem, baseline):
     elem.time = (elem.time-baseline).days
     return elem
+def to_fit(x, a, b, c, d):
+    return a + b*x + c*np.sin(2*math.pi/(365) * x + d)
 
 def load_clean_set(path):
     data_set = parse_binary_llh(path)
@@ -58,10 +60,24 @@ def load_clean_set(path):
     data[:,2] = ns
     data[:,3] = ud
 
-    return outlierdet(data, 300, 2), baseline
+    return outlierdet(data, 300, 2), baseline, data
 
-def predict_plot(data, baseline):
+def predict_plot(dataw, baseline, data):
 
+    p0 = dataw[0,1:]
+    lam, phi, h = p0
+    p0 = llhtoxyz(p0)
+    print(np.linalg.norm(p0))
+    mat = np.array([
+        [-1*sin(phi), cos(phi), 0],
+        [-1*cos(phi)*sin(lam), -1*sin(phi)*sin(lam), cos(lam)],
+        [cos(phi)*cos(lam), sin(phi)*cos(lam), sin(lam)]
+    ])
+
+    plotposw = np.array([np.matmul(mat, llhtoxyz(dataw[i,1:])-p0) for i in range(dataw.shape[0])])
+    print(plotposw.shape)
+    print(dataw.shape)
+    
     p0 = data[0,1:]
     lam, phi, h = p0
     p0 = llhtoxyz(p0)
@@ -71,16 +87,36 @@ def predict_plot(data, baseline):
         [-1*cos(phi)*sin(lam), -1*sin(phi)*sin(lam), cos(lam)],
         [cos(phi)*cos(lam), sin(phi)*cos(lam), sin(lam)]
     ])
-    f, axarr = plt.subplots(3, sharex=True)
+    f, axarr = plt.subplots(3,2, sharex=True)
     plotpos = np.array([np.matmul(mat, llhtoxyz(data[i,1:])-p0) for i in range(data.shape[0])])
     print(plotpos.shape)
     print(data.shape)
-    for i in range(0,3):
-        axarr[i].axhline(y=0, color='k')
-        axarr[i].set_ylim([min(plotpos[:,i]), max(plotpos[:,i])])
-        #axarr[i].set_xlim([baseline, baseline+datetime.timedelta(days=data[i][-1,0])])
-        axarr[i].scatter([baseline + datetime.timedelta(days=x) for x in data[:,0]], plotpos[:,i], s=0.1)
+    
 
+    north = linregress(dataw[:,0],dataw[:,2])
+    east = linregress(dataw[:,0],dataw[:,1])
+    up, away = curve_fit(to_fit,dataw[:,0],dataw[:,3])
+
+    for i in range(0,3):
+        axarr[i,0].axhline(y=0, color='k')
+        axarr[i,0].set_ylim([min(plotposw[:,i]), max(plotposw[:,i])])
+        #axarr[i].set_xlim([baseline, baseline+datetime.timedelta(days=data[i][-1,0])])
+        axarr[i,0].scatter([baseline + datetime.timedelta(days=x) for x in dataw[:,0]], plotposw[:,i], s=0.1)
+        axarr[i,0].set_ylabel('Displacement')
+    for i in range(0,3):
+        axarr[i,1].axhline(y=0, color='k')
+        axarr[i,1].set_ylim([min(plotpos[:,i]), max(plotpos[:,i])])
+        #axarr[i].set_xlim([baseline, baseline+datetime.timedelta(days=data[i][-1,0])])
+        axarr[i,1].scatter([baseline + datetime.timedelta(days=x) for x in data[:,0]], plotpos[:,i], s=0.1)
+        axarr[i,1].set_ylabel('Displacement')
+    
+    axarr[0,0].set_xlabel('East')
+    axarr[0,1].set_xlabel('East')
+    axarr[1,0].set_xlabel('North')
+    axarr[1,1].set_xlabel('North')
+    axarr[2,0].set_xlabel('Up')
+    axarr[2,1].set_xlabel('Up')
+   
     plt.show()
 
 
