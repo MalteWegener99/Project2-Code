@@ -20,6 +20,7 @@ def convolute(d,n):
 
 
 def seismic_act(data):
+    data = outlierdet(data,50,0.75)
     scipy.io.savemat("data.mat",{'data':data})
     eng = matlab.engine.start_matlab()
     eng.quakedet()
@@ -55,47 +56,47 @@ if __name__ == "__main__":
 
     data = np.column_stack((times,locationsx,locationsy,locationsz))
 
-    newdata = outlierdet(data,300,1)
+    newdata = outlierdet(data,50,0.75)
     os.chdir("..")
     events  = seismic_act(data)
 
     print(events)
     
-    # plt.subplot(3,2,6)
-    # plt.scatter(times,locationsx,s = 0.1)
-    # plt.ylim(min(locationsx),max(locationsx))
-    # for event in events[0,:]:
-    #     plt.axvline(event)
+    plt.subplot(2,1,1)
+    plt.scatter(times,locationsx,s = 0.1)
+    plt.ylim(min(locationsy),max(locationsy))
+    for event in events[:,0]:
+        plt.axvline(event)
 
     # plt.subplot(3,2,4)
     # plt.scatter(times,locationsy,s = 0.1)
     # plt.ylim(min(locationsy),max(locationsy))
-    # for event in events[0,:]:
+    # for event in events[:,0]:
     #     plt.axvline(event)
     
     # plt.subplot(3,2,2)
     # plt.scatter(times,locationsz,s = 0.1)
     # plt.ylim(min(locationsz),max(locationsz))
-    # for event in events[0,:]:
+    # for event in events[:,0]:
     #     plt.axvline(event)
 
-    # plt.subplot(3,2,5)
-    # plt.scatter(newdata[:,0],newdata[:,1],s = 0.4)
-    # plt.ylim(min(newdata[:,1]),max(newdata[:,1]))
-    # for event in events[0,:]:
-    #     plt.axvline(event)
+    plt.subplot(2,1,2)
+    plt.scatter(newdata[:,0],newdata[:,2],s = 0.4)
+    plt.ylim(min(newdata[:,2]),max(newdata[:,2]))
+    for event in events[:,0]:
+        plt.axvline(event)
 
     # plt.subplot(3,2,3)
     # plt.scatter(newdata[:,0],newdata[:,2],s = 0.4)
     # plt.ylim(min(newdata[:,2]),max(newdata[:,2]))
-    # for event in events[0,:]:
+    # for event in events[:,0]:
     #     plt.axvline(event)
 
     # plt.subplot(3,2,1)
     # plt.scatter(newdata[:,0],newdata[:,3],s = 0.4)
     # plt.ylim(min(newdata[:,3]),max(newdata[:,3]))
-    # for event in events[0,:]:
+    # for event in events[:,0]:
     #     plt.axvline(event)
 
     # plt.autoscale(enable=True,axis = "y",tight=True)
-    # plt.show()
+    plt.show()
