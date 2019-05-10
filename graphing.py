@@ -37,119 +37,119 @@ def parse_binary_llh(path):
             pos_f = file.tell()
             collection.append(Sample_conv(name, time, pos, mat))
         series = sorted(collection,key = lambda x: x.time)
-        # series = average_over(series, 7)
+        # # series = average_over(series, 7)
 
 
-        times = []
-        locx = []
-        locy = []
-        locz = []
-        init_time = series[0].time
-        init_year = init_time//1000
-        init_days = init_time - init_year*1000
-        init_date = datetime.date.fromordinal(datetime.date(init_year,1,1).toordinal()+ init_days - 1)
-        i = 0
+        # times = []
+        # locx = []
+        # locy = []
+        # locz = []
+        # init_time = series[0].time
+        # init_year = init_time//1000
+        # init_days = init_time - init_year*1000
+        # init_date = datetime.date.fromordinal(datetime.date(init_year,1,1).toordinal()+ init_days - 1)
+        # i = 0
 
-        for elem in series:
-            year = elem.time//1000
-            days = elem.time - year*1000
-            date = datetime.date.fromordinal(datetime.date(year,1,1).toordinal()+ days - 1)
-            if not (datetime.date(1999,1,1) <= date < datetime.date(2012,1,1)):
-                continue
-            time = (date - init_date).total_seconds()
-            times.append(time)
-            locx.append(elem.pos[0])
-            locy.append(elem.pos[1])
-            locz.append(elem.pos[2])
+        # for elem in series:
+        #     year = elem.time//1000
+        #     days = elem.time - year*1000
+        #     date = datetime.date.fromordinal(datetime.date(year,1,1).toordinal()+ days - 1)
+        #     if not (datetime.date(1999,1,1) <= date < datetime.date(2012,1,1)):
+        #         continue
+        #     time = (date - init_date).total_seconds()
+        #     times.append(time)
+        #     locx.append(elem.pos[0])
+        #     locy.append(elem.pos[1])
+        #     locz.append(elem.pos[2])
             
     
-        datax = np.column_stack((times,locx))
-        datay = np.column_stack((times,locy))
-        dataz = np.column_stack((times,locz))
+        # datax = np.column_stack((times,locx))
+        # datay = np.column_stack((times,locy))
+        # dataz = np.column_stack((times,locz))
 
-        newdatax = outlierdet(datax,300,1)
-        newdatay = outlierdet(datay,300,1)
-        newdataz = outlierdet(dataz,300,1)
+        # newdatax = outlierdet(datax,300,1)
+        # newdatay = outlierdet(datay,300,1)
+        # newdataz = outlierdet(dataz,300,1)
 
-        p0 = np.array([datax[0,1],datay[0,1],dataz[0,1]])
-        phi, lam, h = p0
+        # p0 = np.array([datax[0,1],datay[0,1],dataz[0,1]])
+        # phi, lam, h = p0
 
-        mat = np.array([[-1*sin(lam),cos(lam), 0.],
-                            [-1*cos(lam)*sin(phi), -1*sin(lam)*sin(phi), cos(phi)],
-                            [cos(lam)*cos(phi), sin(lam)*cos(phi), sin(phi)]]).T
+        # mat = np.array([[-1*sin(lam),cos(lam), 0.],
+        #                     [-1*cos(lam)*sin(phi), -1*sin(lam)*sin(phi), cos(phi)],
+        #                     [cos(lam)*cos(phi), sin(lam)*cos(phi), sin(phi)]]).T
 
-        tmpx = []
-        tmpy = []
-        tmpz = []
-        for elem in newdatax[:,1]:
-            tmpx.append(elem - p0[0])
-        tmpx = np.array(tmpx)
-        for elem in newdatay[:,1]:
-            tmpy.append(elem - p0[1])
-        tmpy = np.array(tmpy)
-        for elem in newdataz[:,1]:
-            tmpz.append(elem - p0[2])
-        tmpz = np.array(tmpz)
+        # tmpx = []
+        # tmpy = []
+        # tmpz = []
+        # for elem in newdatax[:,1]:
+        #     tmpx.append(elem - p0[0])
+        # tmpx = np.array(tmpx)
+        # for elem in newdatay[:,1]:
+        #     tmpy.append(elem - p0[1])
+        # tmpy = np.array(tmpy)
+        # for elem in newdataz[:,1]:
+        #     tmpz.append(elem - p0[2])
+        # tmpz = np.array(tmpz)
   
-        newdatax[:,1] = mat[0,0]*tmpx+mat[0,1]*tmpx+mat[0,2]*tmpx
-        newdatay[:,1] = mat[1,0]*tmpy+mat[1,1]*tmpy+mat[1,2]*tmpy
-        newdataz[:,1] = mat[2,0]*tmpz+mat[2,1]*tmpz+mat[2,2]*tmpz
-        ts2x = []
-        mindatex = newdatax[0,0]
-        for elem in newdatax[:,0]:
-            ts2x.append(elem - mindatex)
-        ts2x = np.array(ts2x)
-        ts2y = []
-        mindatey = newdatay[0,0]
-        for elem in newdatay[:,0]:
-            ts2y.append(elem - mindatey)
-        ts2y = np.array(ts2y)
-        ts2z = []
-        mindatez = newdataz[0,0]
-        for elem in newdataz[:,0]:
-            ts2z.append(elem - mindatez)
-        ts2z = np.array(ts2z)
+        # newdatax[:,1] = mat[0,0]*tmpx+mat[0,1]*tmpx+mat[0,2]*tmpx
+        # newdatay[:,1] = mat[1,0]*tmpy+mat[1,1]*tmpy+mat[1,2]*tmpy
+        # newdataz[:,1] = mat[2,0]*tmpz+mat[2,1]*tmpz+mat[2,2]*tmpz
+        # ts2x = []
+        # mindatex = newdatax[0,0]
+        # for elem in newdatax[:,0]:
+        #     ts2x.append(elem - mindatex)
+        # ts2x = np.array(ts2x)
+        # ts2y = []
+        # mindatey = newdatay[0,0]
+        # for elem in newdatay[:,0]:
+        #     ts2y.append(elem - mindatey)
+        # ts2y = np.array(ts2y)
+        # ts2z = []
+        # mindatez = newdataz[0,0]
+        # for elem in newdataz[:,0]:
+        #     ts2z.append(elem - mindatez)
+        # ts2z = np.array(ts2z)
         
-        plps = [newdatax[:,1],newdatay[:,1],newdataz[:,1]]
-        plts = [newdatax[:,0],newdatay[:,0],newdataz[:,0]]
+        # plps = [newdatax[:,1],newdatay[:,1],newdataz[:,1]]
+        # plts = [newdatax[:,0],newdatay[:,0],newdataz[:,0]]
         
-        ts2 = [ts2x,ts2y,ts2z]
+        # ts2 = [ts2x,ts2y,ts2z]
 
 
-        north = linregress(ts2x,newdatax[:, 1])
-        east = linregress(ts2y, newdatay[:, 1])
-        up, away = curve_fit(to_fit2, ts2z,newdataz[:, 1])
-        print("{} mm/y".format(north[0]*365*1000))
-        print("{} mm/y".format(east[0]*365*1000))
-        print("{} mm/y".format(up[1]*365*1000))
-        print(north)
-        print(east)
-        print(up)
+        # north = linregress(ts2x,newdatax[:, 1])
+        # east = linregress(ts2y, newdatay[:, 1])
+        # up, away = curve_fit(to_fit2, ts2z,newdataz[:, 1])
+        # print("{} mm/y".format(north[0]*365*1000))
+        # print("{} mm/y".format(east[0]*365*1000))
+        # print("{} mm/y".format(up[1]*365*1000))
+        # print(north)
+        # print(east)
+        # print(up)
 
 
         
 
-        plt.subplot(3,1,1)
-        plt.axhline(y=0, color='k')
-        plt.scatter([x/31536000 + 2001 for x in newdatax[:,0]],newdatax[:,1],s = 2)
-        plt.ylim(min(newdatax[:,1]),max(newdatax[:,1]))
-        plt.plot([mindatex/31536000 + 2001, plts[0][-1]/31536000 + 2001], [north[1], north[1] + north[0]*ts2[0][-1]], color='r')
+        # plt.subplot(3,1,1)
+        # plt.axhline(y=0, color='k')
+        # plt.scatter([x/31536000 + 2001 for x in newdatax[:,0]],newdatax[:,1],s = 2)
+        # plt.ylim(min(newdatax[:,1]),max(newdatax[:,1]))
+        # plt.plot([mindatex/31536000 + 2001, plts[0][-1]/31536000 + 2001], [north[1], north[1] + north[0]*ts2[0][-1]], color='r')
          
-        plt.subplot(3,1,2)
-        plt.axhline(y=0, color='k')
-        plt.scatter([x/31536000 + 2001 for x in newdatay[:,0]],newdatay[:,1],s = 2)
-        plt.ylim(min(newdatay[:,1]),max(newdatay[:,1]))
-        plt.plot([mindatey/31536000 + 2001, plts[1][-1]/31536000 + 2001], [east[1], east[1] + east[0]*ts2[1][-1]], color='r')
+        # plt.subplot(3,1,2)
+        # plt.axhline(y=0, color='k')
+        # plt.scatter([x/31536000 + 2001 for x in newdatay[:,0]],newdatay[:,1],s = 2)
+        # plt.ylim(min(newdatay[:,1]),max(newdatay[:,1]))
+        # plt.plot([mindatey/31536000 + 2001, plts[1][-1]/31536000 + 2001], [east[1], east[1] + east[0]*ts2[1][-1]], color='r')
 
-        plt.subplot(3,1,3)
-        plt.axhline(y=0, color='k')
-        plt.scatter([x/31536000 + 2001 for x in newdataz[:,0]],newdataz[:,1],s = 2)
-        plt.ylim(min(newdataz[:,1]),max(newdataz[:,1]))
-        plt.plot([x/31536000 + 2001 for x in plts[2]], [to_fit2( x, up[0], up[1], up[2], up[3]) for x in ts2z], color='r')
-        # gra[0].plot([plts[0][0], plts[0][-1]], [north[1], north[1] + north[0]*ts2x[-1]])
-        # gra[1].plot([plts[1][0], plts[1][-1]], [east[1], east[1] + east[0]*ts2y[-1]])
-        # gra[2].plot(plts[2][:], list(map(lambda x: to_fit(x, up[0], up[1], up[2], up[3]),ts2z)))
-        plt.show()
+        # plt.subplot(3,1,3)
+        # plt.axhline(y=0, color='k')
+        # plt.scatter([x/31536000 + 2001 for x in newdataz[:,0]],newdataz[:,1],s = 2)
+        # plt.ylim(min(newdataz[:,1]),max(newdataz[:,1]))
+        # plt.plot([x/31536000 + 2001 for x in plts[2]], [to_fit2( x, up[0], up[1], up[2], up[3]) for x in ts2z], color='r')
+        # # gra[0].plot([plts[0][0], plts[0][-1]], [north[1], north[1] + north[0]*ts2x[-1]])
+        # # gra[1].plot([plts[1][0], plts[1][-1]], [east[1], east[1] + east[0]*ts2y[-1]])
+        # # gra[2].plot(plts[2][:], list(map(lambda x: to_fit(x, up[0], up[1], up[2], up[3]),ts2z)))
+        # plt.show()
         return collection
 
 def to_fit(x, a, b, c, d):
