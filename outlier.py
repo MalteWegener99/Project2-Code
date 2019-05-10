@@ -15,6 +15,7 @@ import matlab
 
 
 def outlierdet(data,n,sl):
+    '''Recommended Inputs: n = 50, sl = 0.75'''
     for col in range(1,len(data[0,:])):
         print(col)
         d = data[:,col]
