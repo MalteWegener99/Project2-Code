@@ -58,14 +58,13 @@ def load_clean_set(path):
     data[:,2] = ns
     data[:,3] = ud
 
-    return outlierdet(data, 300, 2), baseline
+    return outlierdet(data, 300, 1), baseline
 
 def predict_plot(data, baseline):
 
     p0 = data[0,1:]
     lam, phi, h = p0
     p0 = llhtoxyz(p0)
-    print(np.linalg.norm(p0))
     mat = np.array([
         [-1*sin(phi), cos(phi), 0],
         [-1*cos(phi)*sin(lam), -1*sin(phi)*sin(lam), cos(lam)],
@@ -73,13 +72,32 @@ def predict_plot(data, baseline):
     ])
     f, axarr = plt.subplots(3, sharex=True)
     plotpos = np.array([np.matmul(mat, llhtoxyz(data[i,1:])-p0) for i in range(data.shape[0])])
-    print(plotpos.shape)
-    print(data.shape)
+
+    #make subseries for plotting
+    split = (datetime.date(2004,12,26)-baseline).days
+    splitindex = 0
+    for i in range(data.shape[0]):
+        if data[i,0] < split:
+            splitindex = i
+        else:
+            break
+    # Plotting of the actual stuff
+    f.suptitle(sys.argv[1])
+    axarr[0].set_title("East [m]")
+    axarr[1].set_title("North [m]")
+    axarr[2].set_title("Up [m]")
     for i in range(0,3):
+        predict = linregress(data[:splitindex,0], plotpos[:splitindex,i])
+        print("Before:", predict[0]*365*1000, "mm/yr")
+        predict2 = linregress(data[splitindex:,0], plotpos[splitindex:,i])
+        print("After:", predict2[0]*365*1000, "mm/yr")
         axarr[i].axhline(y=0, color='k')
         axarr[i].set_ylim([min(plotpos[:,i]), max(plotpos[:,i])])
+        axarr[i].axvline(x=datetime.datetime(2004,12,26))
         #axarr[i].set_xlim([baseline, baseline+datetime.timedelta(days=data[i][-1,0])])
         axarr[i].scatter([baseline + datetime.timedelta(days=x) for x in data[:,0]], plotpos[:,i], s=0.1)
+        axarr[i].plot([baseline + datetime.timedelta(days=data[0,0]), baseline + datetime.timedelta(days=data[splitindex-1,0])], [predict[1], predict[1]+predict[0]*(data[splitindex-1,0]-data[0,0])], color='r')
+        axarr[i].plot([baseline + datetime.timedelta(days=data[splitindex,0]), baseline + datetime.timedelta(days=data[-1,0])], [predict2[1], predict2[1]+predict2[0]*(data[-1,0]-data[splitindex,0])], color='r')
 
     plt.show()
 
