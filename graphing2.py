@@ -70,7 +70,8 @@ def to_fit(x, a, b, c, d):
     return a + b*x + c*np.sin(2*math.pi/365 * x + d)
 
 def to_fit2(x, a, b, c, d, e):
-    return a * np.power(x-b,2)+c*np.exp(d*(x-e))
+    x = x-a
+    return b*x*np.log(c*x)-x*d+e
 
 def predict_plot(data, baseline):
 
@@ -102,7 +103,7 @@ def predict_plot(data, baseline):
     for i in range(0,2):
         predict = linregress(data[:splitindex,0], plotpos[:splitindex,i])
         print("Before:", predict[0]*365*1000, "mm/yr")
-        predict2, away = curve_fit(to_fit2, data[:splitindex,0], plotpos[:splitindex,i], p0=(1,data[splitindex+1,0],1,1,data[splitindex+1,0]))
+        predict2, away = curve_fit(to_fit2, data[:splitindex,0], plotpos[:splitindex,i])
         print("After:", predict2[0]*365*1000, "mm/yr")
         axarr[i].axhline(y=0, color='k')
         axarr[i].set_ylim([min(plotpos[:,i]), max(plotpos[:,i])])
