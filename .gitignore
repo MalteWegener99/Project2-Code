@@ -1,4 +1,4 @@
-__pycache__/Sample.cpython-36.pyc
+__pycache__/*.*.pyc
 __pycache__/*
 *.jpg
 *.JPG
@@ -12,5 +12,6 @@ Assignment/bmps/pngs/*
 *tseries
 .vscode/*
 move.mp4
+*.pyc
 .vscode/settings.json
 .vscode/settings.json
