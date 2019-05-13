@@ -14,8 +14,7 @@ from sklearn.covariance import EllipticEnvelope
 
 
 def outlierdet(data,n,sl):
-<<<<<<< HEAD
-<<<<<<< HEAD
+
     dx = data[:,1]
     dy = data[:,2]
     dz = data[:,3]
