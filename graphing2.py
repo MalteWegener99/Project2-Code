@@ -11,6 +11,7 @@ from scipy.stats import linregress
 from scipy.optimize import curve_fit
 from outlier import outlierdet
 from graphing import parse_binary_llh
+import matplotlib.dates as mdates
 
 # WGS 84
 f = 1 / 298.257223563
@@ -64,14 +65,14 @@ def load_clean_set(path):
     data[:,5] = nse
     data[:,6] = ude
 
-    return outlierdet(data, 300, 3), baseline
+    return outlierdet(data, 50, 20), baseline
 
 def to_fit(x, a, b, c, d):
     return a + b*x + c*np.sin(2*math.pi/365 * x + d)
 
 def to_fit2(x, a, b, c, d, e):
-    x = x-a
-    return b*x*np.log(c*x)-x*d+e
+    x = (x-a)/e
+    return a*np.sin(b*x)*np.cos(np.sqrt(c*x))+d
 
 def predict_plot(data, baseline):
 
@@ -100,6 +101,16 @@ def predict_plot(data, baseline):
     axarr[0].set_title("East [m]")
     axarr[1].set_title("North [m]")
     axarr[2].set_title("Up [m]")
+
+    years = mdates.YearLocator()   # every year
+    months = mdates.MonthLocator()  # every month
+    yearsFmt = mdates.DateFormatter('%Y')
+
+    for i in range(3):
+        axarr[i].xaxis.set_major_locator(years)
+        axarr[i].xaxis.set_major_formatter(yearsFmt)
+        axarr[i].xaxis.set_minor_locator(months)
+
     for i in range(0,2):
         predict = linregress(data[:splitindex,0], plotpos[:splitindex,i])
         print("Before:", predict[0]*365*1000, "mm/yr")
@@ -110,7 +121,7 @@ def predict_plot(data, baseline):
         axarr[i].axvline(x=datetime.datetime(2004,12,26))
         #axarr[i].set_xlim([baseline, baseline+datetime.timedelta(days=data[i][-1,0])])
         axarr[i].plot([baseline + datetime.timedelta(days=data[0,0]), baseline + datetime.timedelta(days=data[splitindex-1,0])], [predict[1], predict[1]+predict[0]*(data[splitindex-1,0]-data[0,0])], 'r--')
-        axarr[i].plot([baseline + datetime.timedelta(days=x) for x in np.arange(data[splitindex+1,0], data[-1,0], 1)], [to_fit2(x, *predict2) for x in np.arange(data[splitindex+1,0], data[-1,0], 1)], 'r--')
+        #axarr[i].plot([baseline + datetime.timedelta(days=x) for x in np.arange(data[splitindex+1,0], data[-1,0], 1)], [to_fit2(x, *predict2) for x in np.arange(data[splitindex+1,0], data[-1,0], 1)], 'r--')
         axarr[i].errorbar([baseline + datetime.timedelta(days=x) for x in data[:,0]], plotpos[:,i], yerr=10*data[:, 4+i], fmt='x', elinewidth=0.1, markersize=0.5)
         #axarr[i].scatter([baseline + datetime.timedelta(days=x) for x in data[:,0]], plotpos[:,i], s=0.1)
     
