@@ -65,7 +65,7 @@ def load_clean_set(path):
     data[:,5] = nse
     data[:,6] = ude
 
-    return outlierdet(data, 100, 1.5), baseline, data
+    return outlierdet(data, 50, 20), baseline, data
 
 def to_fit(x, a, b, c, d):
     return a + b*x + c*np.sin(2*math.pi/365 * x + d)
