@@ -8,6 +8,9 @@ import os
 from matplotlib import pyplot as plt
 from math import degrees as deg
 from sklearn.cluster import AffinityPropagation
+import matlab.engine
+import scipy.io
+
 
 
 def convolute(d,n):
@@ -16,43 +19,12 @@ def convolute(d,n):
     return conv
 
 
-# def seismic_act(data,n,sl):
-#     data = outlierdet(data,n,1)
-#     events,steps = [],[]
-#     d_conv = data[:,1]
-#     for i in range(n,len(d_conv)-n):
-#         steps.append(abs((d_conv[i] - d_conv[i-1])/(data[i,0] - data[i-1,0])))
-#     ave_step = sum(steps)/len(steps)
-#     std_step = np.std(steps)
-#     for i,step in enumerate(steps):
-#         if step > (ave_step + sl*std_step):
-#             ind = i + n
-#             events.append(data[ind,0])
-#     events = np.column_stack((events,np.ones(len(events))))
-#     print(events)
-#     clustering = AffinityPropagation(damping = 0.6).fit(events)
-#     quakes = clustering.cluster_centers_
-#     quakes = np.delete(quakes, 0 ,axis = 0)
-#     print(quakes)
-#     return quakes[:,0]
-
-def seismic_act(data,sl):
-    data = outlierdet(data,50,0.1)
-    events = []
-    d = data[:,1]
-    steps = d[1:] - d[:-1]
-    ratios = 1. * steps[1:] / steps[:-1]
-    jumps = ratios[1:] - ratios[:-1]
-    print(len(jumps))
-    print(len(d))
-    jump_ave = sum(jumps)/len(jumps)
-    jump_dev = np.std(jumps)
-    for i,jump in enumerate(jumps):
-        if abs(jump) > (jump_ave + sl*jump_dev):
-            events.append(data[i,0])
-    return events
-
-        
+def seismic_act(data):
+    scipy.io.savemat("data.mat",{'data':data})
+    eng = matlab.engine.start_matlab()
+    eng.quakedet()
+    quakes = scipy.io.loadmat("earthquakes.mat")['earthquakes']
+    return quakes
     
 
 
@@ -63,7 +35,7 @@ if __name__ == "__main__":
     collection = parse_binary_llh(path + "\\KUAL.tseries.neu")
     series = sorted(collection,key = lambda x: x.time)
 
-    locations,times = [],[]
+    locationsx,locationsy,locationsz,times = [],[],[],[]
     init_time = series[0].time
     init_year = init_time//1000
     init_days = init_time - init_year*1000
@@ -77,25 +49,53 @@ if __name__ == "__main__":
         date = datetime.date.fromordinal(datetime.date(year,1,1).toordinal()+ days - 1)
         time = (date - init_date).total_seconds()
         times.append(time)
-        locations.append(deg(series[i].pos[1]))
+        locationsx.append(deg(series[i].pos[0]))
+        locationsy.append(deg(series[i].pos[1]))
+        locationsz.append(deg(series[i].pos[2]))
 
-    data = np.column_stack((times,locations))
+    data = np.column_stack((times,locationsx,locationsy,locationsz))
 
     newdata = outlierdet(data,300,1)
-    events  = seismic_act(data,1)
+    os.chdir("..")
+    events  = seismic_act(data)
+
+    print(events)
     
-    # print(events)
-	
-    plt.subplot(2,1,1)
-    plt.scatter(times,locations,s = 0.1)
-    for event in events:
-        plt.axvline(x=event,color = "k")
-    plt.ylim(min(locations),max(locations))
+    # plt.subplot(3,2,6)
+    # plt.scatter(times,locationsx,s = 0.1)
+    # plt.ylim(min(locationsx),max(locationsx))
+    # for event in events[0,:]:
+    #     plt.axvline(event)
+
+    # plt.subplot(3,2,4)
+    # plt.scatter(times,locationsy,s = 0.1)
+    # plt.ylim(min(locationsy),max(locationsy))
+    # for event in events[0,:]:
+    #     plt.axvline(event)
     
-    plt.subplot(2,1,2)
-    plt.scatter(newdata[:,0],newdata[:,1],s = 0.4)
-    # for event in events:
-        # plt.axvline(x=event,color = "k")
-    plt.ylim(min(newdata[:,1]),max(newdata[:,1]))
- 
-    plt.show()
+    # plt.subplot(3,2,2)
+    # plt.scatter(times,locationsz,s = 0.1)
+    # plt.ylim(min(locationsz),max(locationsz))
+    # for event in events[0,:]:
+    #     plt.axvline(event)
+
+    # plt.subplot(3,2,5)
+    # plt.scatter(newdata[:,0],newdata[:,1],s = 0.4)
+    # plt.ylim(min(newdata[:,1]),max(newdata[:,1]))
+    # for event in events[0,:]:
+    #     plt.axvline(event)
+
+    # plt.subplot(3,2,3)
+    # plt.scatter(newdata[:,0],newdata[:,2],s = 0.4)
+    # plt.ylim(min(newdata[:,2]),max(newdata[:,2]))
+    # for event in events[0,:]:
+    #     plt.axvline(event)
+
+    # plt.subplot(3,2,1)
+    # plt.scatter(newdata[:,0],newdata[:,3],s = 0.4)
+    # plt.ylim(min(newdata[:,3]),max(newdata[:,3]))
+    # for event in events[0,:]:
+    #     plt.axvline(event)
+
+    # plt.autoscale(enable=True,axis = "y",tight=True)
+    # plt.show()
