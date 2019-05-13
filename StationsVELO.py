@@ -6,7 +6,6 @@ from geoplotlib.utils import epoch_to_str, BoundingBox, read_csv
 import glob, os, sys, csv, fnmatch
 from graphing import parse_binary_llh
 from math import degrees as deg
-from splining import great_circle_dist
 
 #path to converted files
 path = os.path.dirname(os.path.realpath(__file__))+'/conv'
@@ -27,12 +26,9 @@ for file in os.listdir():
         S_destilat = deg(series[100].pos[0])
         S_destilon = deg(series[100].pos[1])
         S_destitime = series[100].time
-        lat_V = ((S_startlat-S_destilat)/(S_destitime-S_Starttime))*Earth_radius
-        lon_V = ((S_startlon-S_destilon)/(S_destitime-S_Starttime))*Earth_radius
-        V_destilat = S_startlat + ((S_destilat-S_startlat)*500000)
-        V_destilon = S_startlon + ((S_destilon-S_startlon)*500000)
+        V_destilat = S_startlat + ((S_destilat-S_startlat)*750000)
+        V_destilon = S_startlon - ((S_destilon-S_startlon)*750000)
         Locations.append([Sname,S_startlat,S_startlon,V_destilat,V_destilon])
-
 
 
 #path to VLOCs.csv
@@ -63,9 +59,10 @@ with open('SLOCs.csv', mode='w', newline='') as SLOCs:
 #plot stations
 Plotdata1 = read_csv('VLOCs.csv')
 Plotdata2 = read_csv('SLOCs.csv')
-gp.graph(Plotdata1, 'S_lat', 'S_lon', 'D_lat', 'D_lon', linewidth=3, color='hot')
-gp.dot(Plotdata2, color='red', point_size=2)
-#optional: gp.labels(Plotdata, 'name', color='black', font_size=8, anchor_x='center')
+gp.set_bbox(BoundingBox(north=9, west=110, south=1, east=95))
+gp.graph(Plotdata1, 'S_lat', 'S_lon', 'D_lat', 'D_lon', linewidth=2, color='Blues')
+gp.dot(Plotdata2, color='blue', point_size=3)
+gp.labels(Plotdata2, 'name', color='black', font_size=8, anchor_x='center')
 gp.tiles_provider('positron')
 
 gp.show()

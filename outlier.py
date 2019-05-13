@@ -1,3 +1,4 @@
+from graphing import parse_binary_llh
 import numpy as np
 import sys
 import datetime
@@ -5,13 +6,18 @@ import glob
 import os
 from matplotlib import pyplot as plt
 from math import degrees as deg
+<<<<<<< HEAD
 from sklearn.cluster import AffinityPropagation
+=======
+from sklearn.covariance import EllipticEnvelope
+>>>>>>> origin/steffi
 
 
 
 
 
 def outlierdet(data,n,sl):
+<<<<<<< HEAD
     dx = data[:,1]
     dy = data[:,2]
     dz = data[:,3]
@@ -106,3 +112,21 @@ if __name__ == "__main__":
 
     # plt.autoscale(enable=True,axis = "y",tight=True)
     plt.show()
+=======
+	d = data[:,1]
+	avg_mask = np.ones(n)/n
+	d_ave = np.convolve(d,avg_mask,mode = "same")
+	diff = []
+	for j in range(n//2,len(data[:,1]) - n//2):
+		diff.append(abs(d_ave[j] - d[j]))
+	sdev = np.std(diff)
+	count = 0
+	for i in range(n//2,len(data[:,1]) - n//2):
+		if abs(d_ave[i] - d[i]) > (sl * sdev):
+			data = np.delete(data,(i - count), axis = 0)
+			count += 1
+	return data
+
+def clean_series(collection) -> list:
+	
+>>>>>>> origin/steffi
