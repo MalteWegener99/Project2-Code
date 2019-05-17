@@ -87,7 +87,7 @@ def graph_series(series):
     print(north)
 
     f, axarr = plt.subplots(3, sharex=True)
-    f.suptitle(sys.argv[1].split("/")[1][:4])
+    f.suptitle(sys.argv[1].split("\\")[1][:4])
     # for i in range(0,3):
     #     axarr[i].axhline(y=0, color='k')
     #     axarr[i].set_xlim([times[0], times[-1]])
