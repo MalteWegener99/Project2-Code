@@ -6,7 +6,7 @@ import os
 from matplotlib import pyplot as plt
 from math import degrees as deg
 from sklearn.cluster import AffinityPropagation
-
+from graphing import parse_binary_llh
 
 
 
@@ -31,7 +31,7 @@ def outlierdet(data,n,sl):
     return data
 
 if __name__ == "__main__":
-    path = "C:\\Users\\Wim Jodehl\\Desktop\\TAaS\\Project2-Code\\conv"
+    path = "C:\\Users\\SID DrW\\Documents\\GitHub\\Project2-Code\\conv"
     os.chdir(path)
 
     collection = parse_binary_llh(path + "\\KUAL.tseries.neu")
