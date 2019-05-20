@@ -28,12 +28,12 @@ if __name__ == "__main__":
     earthquakes = read_csv('earthquakes.csv')
 
     geoplotlib.dot(data)
-    geoplotlib.labels(data, 'name', color=[0,0,255,255], font_size=10, anchor_x='center')
+    geoplotlib.labels(data, 'name', color=[0,0,255,255], font_size=7, anchor_x='center')
 
-    geoplotlib.kde(earthquakes, bw=5, cut_below=1e-4)
+    # geoplotlib.kde(earthquakes, bw=2, cut_below=1e-4)
     geoplotlib.set_smoothing(True)    
-    geoplotlib.dot(earthquakes)
-    geoplotlib.labels(earthquakes, 'name', color=[0,0,255,255], font_size=10, anchor_x='center')
+    # geoplotlib.dot(earthquakes)
+    # geoplotlib.labels(earthquakes, 'name', color=[0,0,255,255], font_size=7, anchor_x='center')
 
     mags = np.genfromtxt("earthquakes.csv",skip_header=1,delimiter=',')[:,-3]
     # print(mags)
