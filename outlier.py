@@ -1,4 +1,3 @@
-from graphing import parse_binary_llh
 import numpy as np
 import sys
 import datetime
@@ -6,8 +5,8 @@ import glob
 import os
 from matplotlib import pyplot as plt
 from math import degrees as deg
-
-
+from sklearn.cluster import AffinityPropagation
+from graphing import parse_binary_llh
 
 
 
@@ -21,9 +20,12 @@ def outlierdet(data,n,sl):
         for j in range(n//2,len(data[:,1]) - n//2):
             diff.append(abs(d_ave[j] - d[j]))
         sdev = np.std(diff)
+        aveg = sum(diff)/len(diff)
         count = 0
         for i in range(n//2,len(data[:,1] - n//2)):
-            if (abs(d_ave[i] - d[i])) > (sl * sdev):
+            if abs(d_ave[i] - d[i]) > (sl * sdev):
+                # print(range(n//2,len(data[:,1] - n//2)))
+                # print(i)
                 data = np.delete(data,(i - count), axis = 0)
                 count += 1
 
@@ -32,8 +34,8 @@ def outlierdet(data,n,sl):
 if __name__ == "__main__":
     path = "C:\\Users\\Wim Jodehl\\Desktop\\TAaS\\Project2-Code\\conv"
     os.chdir(path)
-
-    collection = parse_binary_llh(path + "\\COCO.tseries.neu")
+    station = input("Station: ")
+    collection = parse_binary_llh(path + "\\" + station + ".tseries.neu")
     series = sorted(collection,key = lambda x: x.time)
 
     locationsx,locationsy,locationsz,times = [],[],[],[]
@@ -56,7 +58,8 @@ if __name__ == "__main__":
 
     data = np.column_stack((times,locationsx,locationsy,locationsz))
 
-    newdata = outlierdet(data,25,1)
+
+    newdata = outlierdet(data,50,1)
 
     
     
@@ -75,7 +78,7 @@ if __name__ == "__main__":
     plt.subplot(3,1,1)
     plt.scatter(newdata[:,0],newdata[:,1],s = 0.4)
     plt.ylim(min(newdata[:,1]),max(newdata[:,1]))
-    plt.title("COCO")
+    plt.title(station)
 
     plt.subplot(3,1,2)
     plt.scatter(newdata[:,0],newdata[:,2],s = 0.4)
@@ -85,4 +88,8 @@ if __name__ == "__main__":
     plt.scatter(newdata[:,0],newdata[:,3],s = 0.4)
     plt.ylim(min(newdata[:,3]),max(newdata[:,3])) 
     # plt.autoscale(enable=True,axis = "y",tight=True)
+
+    mng = plt.get_current_fig_manager()
+    mng.full_screen_toggle()
+
     plt.show()
