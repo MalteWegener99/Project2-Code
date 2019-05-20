@@ -8,5 +8,5 @@
         "cmath": "cpp"
     },
     "python.linting.enabled": false,
-    "python.pythonPath": "C:\\Users\\chang\\AppData\\Local\\Programs\\Python\\Python36\\python.exe"
+    "python.pythonPath": "C:\\Users\\chang\\AppData\\Local\\Continuum\\anaconda3\\python.exe"
 }
