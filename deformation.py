@@ -136,13 +136,6 @@ def analyse(file_name):
     def animate(t):
         #ax.clear()
         date = start + datetime.timedelta(days=t)
-<<<<<<< HEAD
-        ax.set_title(date)
-        ax.set_xlim([1.72,1.84])
-        ax.triplot(positions[:,1,t],positions[:,0,t],simplices, linewidth=1.0)
-        ax.triplot(vertices[:,1],vertices[:,0],simplices, linewidth=0.5)
-        ax.axis('equal')
-=======
         plt.title(date)
         plt.grid()
         plt.triplot(np.rad2deg(positions[:,1,t]),np.rad2deg(positions[:,0,t]),simplices, linewidth=1.0)
@@ -155,7 +148,6 @@ def analyse(file_name):
             colr = cmap(mag/maxspeed)
             plt.quiver(np.rad2deg(positions[i,1,t]),np.rad2deg(positions[i,0,t]), speed[i,1,t], speed[i,0,t], colr, scale=0.8e-9)
         plt.axis('equal')
->>>>>>> a66416b14e572419ce23972c69ae3e3ab80412bd
 
     #ani = animation.FuncAnimation(fig, animate, frames=range(1,rng-10,7), interval=100, save_count=500, blit=False)
     print(start)

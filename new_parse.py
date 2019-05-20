@@ -41,6 +41,7 @@ points = []
 
 for i in range(len(lat_file)):
 	lat = float(lat_file[i].split()[1])
+	print(lat)
 	lon = float(lon_file[i].split()[1])
 	hei = float(rad_file[i].split()[1])
 	dat = lat_file[i].split()[-1]
@@ -48,7 +49,10 @@ for i in range(len(lat_file)):
 	s_lon = float(lon_file[i].split()[2])
 	s_hei = float(rad_file[i].split()[2])
 
-	points.append(Sample_conv("PHKT", parse_date(dat), [lat,lon,hei], [s_lat,s_lon,s_hei]))
+	if i 
+
+	points.append(Sample_conv("PHUK", parse_date(dat), [lat,lon,hei], [s_lat,s_lon,s_hei]))
+
 
 f, axarr = plt.subplots(3, sharex=True)
 
