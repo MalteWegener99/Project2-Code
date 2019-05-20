@@ -123,32 +123,34 @@ def plot_rel(s_name):
     longl = []
     interval = []
     rotation = []
+    magl = []
     tl = []
     for i in range(1,namel.size):
         if s_name == s_name: #namel[i-1]
             latl.append(latlrel[i-1]*60*60*24*365)
             longl.append(longlrel[i-1]*60*60*24*365)
-
+            magl.append(math.sqrt((longlrel[i-1]*60*60*24*365)**2 + (latlrel[i-1]*60*60*24*365)**2))
             tl.append(datetime.date.fromtimestamp(tlrel[i-1]))
             #print(tl[i])
 
 
     plt.close('all')
-    fig, (ax,ax2) = plt.subplots(2,1)
-    ax.plot(tl, latl, linewidth=0.3)
-    ax2.plot(tl,longl, linewidth=0.3)
+    fig, ax = plt.subplots(1,1)
+    ax.plot(tl, magl, linewidth=0.3)    
+    #fig = plt.scatter(tl, magl, linewidth=0.3, color = (0.8,0,0.6))
+    #.plot(tl,longl, linewidth=0.3,color='y')
     ax.set_xlabel('Dates')
     ax.set_ylabel('latitudinal velocity')
-    ax2.set_xlabel('Dates')
-    ax2.set_ylabel('longitudinal velocity')
+    #ax2.set_xlabel('Dates')
+    #ax2.set_ylabel('longitudinal velocity')
     # rotate and align the tick labels so they look better
-    fig.autofmt_xdate()
+    #fig.autofmt_xdate()
 
     # use a more precise date string for the x axis locations in the
     # toolbar
     import matplotlib.dates as mdates
     ax.fmt_xdata = mdates.DateFormatter('%Y-%m-%d')
-    ax2.fmt_xdata = mdates.DateFormatter('%Y-%m-%d')
+    #ax2.fmt_xdata = mdates.DateFormatter('%Y-%m-%d')
     plt.title('Relative displacement per unit time')
     plt.show()
 
