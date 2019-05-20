@@ -37,6 +37,8 @@ def convert_to_date(elem):
 def date_relative_days(elem, baseline):
     elem.time = (elem.time-baseline).days
     return elem
+def to_fit(x, a, b, c, d):
+    return a + b*x + c*np.sin(2*math.pi/(365) * x + d)
 
 def load_clean_set(path):
     data_set = parse_binary_llh(path)
@@ -74,7 +76,7 @@ def to_fit2(x, a, b, c, d, e):
     x = (x-a)/e
     return a*np.sin(b*x)*np.cos(np.sqrt(c*x))+d
 
-def predict_plot(data, baseline):
+def predict_plot(dataw, baseline, data):
 
     p0 = data[0,1:4]
     print(p0)
