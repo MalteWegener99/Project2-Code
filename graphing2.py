@@ -37,6 +37,8 @@ def convert_to_date(elem):
 def date_relative_days(elem, baseline):
     elem.time = (elem.time-baseline).days
     return elem
+def to_fit(x, a, b, c, d):
+    return a + b*x + c*np.sin(2*math.pi/(365) * x + d)
 
 def load_clean_set(path):
     data_set = parse_binary_llh(path)
@@ -74,7 +76,7 @@ def to_fit2(x, a, b, c, d, e):
     x = (x-a)/e
     return a*np.sin(b*x)*np.cos(np.sqrt(c*x))+d
 
-def predict_plot(data, baseline):
+def predict_plot(dataw, baseline, data):
 
     p0 = data[0,1:4]
     print(p0)
@@ -111,13 +113,14 @@ def predict_plot(data, baseline):
         axarr[i].xaxis.set_major_formatter(yearsFmt)
         axarr[i].xaxis.set_minor_locator(months)
 
+    name = ["North", "East", "Up"]
+
     for i in range(0,2):
         predict = linregress(data[:splitindex,0], plotpos[:splitindex,i])
-        print("Before:", predict[0]*365*1000, "mm/yr")
-        predict2, away = curve_fit(to_fit2, data[:splitindex,0], plotpos[:splitindex,i])
-        print("After:", predict2[0]*365*1000, "mm/yr")
+        print(name[i], ": Before:", predict[0]*365*1000, "mm/yr,", predict[-1]*1000, "[mm]")
         axarr[i].axhline(y=0, color='k')
         axarr[i].set_ylim([min(plotpos[:,i]), max(plotpos[:,i])])
+        axarr[i].set_xlim([baseline, baseline+datetime.timedelta(days=data[-1,0])])
         axarr[i].axvline(x=datetime.datetime(2004,12,26))
         #axarr[i].set_xlim([baseline, baseline+datetime.timedelta(days=data[i][-1,0])])
         axarr[i].plot([baseline + datetime.timedelta(days=data[0,0]), baseline + datetime.timedelta(days=data[splitindex-1,0])], [predict[1], predict[1]+predict[0]*(data[splitindex-1,0]-data[0,0])], 'r--')
@@ -127,7 +130,9 @@ def predict_plot(data, baseline):
     
     for i in range(2,3):
         up, away = curve_fit(to_fit, data[:splitindex,0], plotpos[:splitindex,i])
+        print(name[i], ": Before:", up[1]*365*1000, "mm/yr,", np.sqrt(np.diag(away))[1]*1000, "[mm]")
         up2, away = curve_fit(to_fit, data[splitindex+1:,0], plotpos[splitindex+1:,i])
+        print(name[i], ": After:", up2[1]*365*1000, "mm/yr,", np.sqrt(np.diag(away))[1]*1000, "[mm]")
         axarr[i].axhline(y=0, color='k')
         axarr[i].set_ylim([min(plotpos[:,i]), max(plotpos[:,i])])
         axarr[i].axvline(x=datetime.datetime(2004,12,26))
