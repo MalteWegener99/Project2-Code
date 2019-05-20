@@ -37,8 +37,6 @@ def convert_to_date(elem):
 def date_relative_days(elem, baseline):
     elem.time = (elem.time-baseline).days
     return elem
-def to_fit(x, a, b, c, d):
-    return a + b*x + c*np.sin(2*math.pi/(365) * x + d)
 
 def load_clean_set(path):
     data_set = parse_binary_llh(path)
@@ -66,6 +64,7 @@ def load_clean_set(path):
     data[:,4] = ewe
     data[:,5] = nse
     data[:,6] = ude
+
     return outlierdet(data, 50, 20), baseline
 
 def to_fit(x, a, b, c, d):
@@ -90,7 +89,7 @@ def predict_plot(data, baseline):
     plotpos = np.array([np.matmul(mat, llhtoxyz(data[i,1:4])-p0) for i in range(data.shape[0])])
 
     #make subseries for plotting
-    split = 1000
+    split = (datetime.date(2004,12,26)-baseline).days
     splitindex = 0
     for i in range(data.shape[0]):
         if data[i,0] < split:
@@ -118,15 +117,15 @@ def predict_plot(data, baseline):
         predict = linregress(data[:splitindex,0], plotpos[:splitindex,i])
         print(name[i], ": Before:", predict[0]*365*1000, "mm/yr,", predict[-1]*1000, "[mm]")
         axarr[i].axhline(y=0, color='k')
-        axarr[i].set_ylim([min(plotpos[:,i]), max(plotpos[:,i])])
+        #axarr[i].set_ylim([min(plotpos[:,i]), max(plotpos[:,i])])
         axarr[i].set_xlim([baseline, baseline+datetime.timedelta(days=data[-1,0])])
         axarr[i].axvline(x=datetime.datetime(2004,12,26))
         #axarr[i].set_xlim([baseline, baseline+datetime.timedelta(days=data[i][-1,0])])
         axarr[i].plot([baseline + datetime.timedelta(days=data[0,0]), baseline + datetime.timedelta(days=data[splitindex-1,0])], [predict[1], predict[1]+predict[0]*(data[splitindex-1,0]-data[0,0])], 'r--')
         #axarr[i].plot([baseline + datetime.timedelta(days=x) for x in np.arange(data[splitindex+1,0], data[-1,0], 1)], [to_fit2(x, *predict2) for x in np.arange(data[splitindex+1,0], data[-1,0], 1)], 'r--')
-        axarr[i].errorbar([baseline + datetime.timedelta(days=x) for x in data[:,0]], plotpos[:,i], yerr=10*data[:, 4+i], fmt='x', elinewidth=0.1, markersize=0.5)
+        axarr[i].errorbar([baseline + datetime.timedelta(days=x) for x in data[:,0]],[plotpos[j,i] if baseline + datetime.timedelta(days=data[j, 0]) < datetime.date(2004,12,26) else plotpos[j,i]-(data[j,0]-data[splitindex,0])*predict[0] for j in range(plotpos.shape[0])], yerr=10*data[:, 4+i], fmt='x', elinewidth=0.1, markersize=0.5)
         #axarr[i].scatter([baseline + datetime.timedelta(days=x) for x in data[:,0]], plotpos[:,i], s=0.1)
-    
+        #if baseline + datetime.timedelta(days=data[j, 0]) < datetime.date(2004,12,26) plotpos[j,i] else plotpos[j,i] for j in range(plotpos.shape[0])]
     for i in range(2,3):
         up, away = curve_fit(to_fit, data[:splitindex,0], plotpos[:splitindex,i])
         print(name[i], ": Before:", up[1]*365*1000, "mm/yr,", np.sqrt(np.diag(away))[1]*1000, "[mm]")
