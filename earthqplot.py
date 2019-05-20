@@ -39,7 +39,7 @@ if __name__ == "__main__":
     geoplotlib.labels(earthquakes, 'name', color=[0,0,255,255], font_size=10, anchor_x='center')
 
     
-    mags = np.genfromtxt("earthquakes.csv",skip_header=1,delimiter=',')[:,-1]
+    mags = np.genfromtxt("earthquakes.csv",skip_header=1,delimiter=',')[:,-3]
     print(mags)
     print(len(mags))
     #geoplotlib.markers(earthquakes, 'm.png')

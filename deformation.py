@@ -11,9 +11,7 @@ import scipy
 import matplotlib.animation as animation
 import types
 from scipy.interpolate import interp1d
-from scipy import signal
-from outlier import outlierdet
-import matplotlib
+
 
 f = 1 / 298.257223563
 e_2 = 2 * f - f**2
@@ -38,13 +36,7 @@ def make_spline(collection, start_date):
             phi.append(elem.pos[0])
             lam.append(elem.pos[1])
             h.append(elem.pos[2])
-    s = 0
-    smooth = 1000
-    dev = 0.1
-    cleanphi = outlierdet(np.array([dates,phi]).T,smooth,dev)
-    cleanlam = outlierdet(np.array([dates,lam]).T,smooth,dev)
-    n = 8
-    return (scipy.interpolate.UnivariateSpline(cleanphi[:,0][::n], cleanphi[:,1][::n], k=2, s=s),scipy.interpolate.UnivariateSpline(cleanlam[:,0][::n], cleanlam[:,1][::n], k=2, s=s), scipy.interpolate.UnivariateSpline(dates, h, s=s), dates)
+    return (scipy.interpolate.interp1d(dates, phi),scipy.interpolate.interp1d(dates, lam), scipy.interpolate.interp1d(dates, h), dates)
 
 def load_set(file_name):
     stations_names = open(file_name).readlines()
@@ -66,7 +58,6 @@ def load_set(file_name):
 def make_spline_set(collection, min_date):
     col = []
     for key in collection:
-        print(key)
         phi, lam, *throw = make_spline(collection[key], min_date)
         col.append([phi,lam])
 
@@ -126,7 +117,6 @@ def analyse(file_name):
     factor = 400000
 
     positions = np.zeros((initial.shape[0],initial.shape[1],rng))
-    speed = np.zeros((initial.shape[0],initial.shape[1],rng))
     for t in range(1,rng-10,7):
         for i in range(0,positions.shape[0]):
             phi0 = initial[i,0]
@@ -137,17 +127,12 @@ def analyse(file_name):
             lamog = splines[0][1](t)-initial[0,1]
             positions[i,0,t] = phi0 + factor*(phi1-phi0)#-phiog)
             positions[i,1,t] = lam0 + factor*(lam1-lam0)#-lamog)
-            speed[i,0,t] = splines[i][0].derivative()(t)
-            speed[i,1,t] = splines[i][1].derivative()(t)
 
 
     simplices = triangulation.simplices
     vertices = triangulation.points
     fig, ax = plt.subplots()
-    print(positions.shape)
-    speeds = [sqrt(speed[i,1,t]**2 + speed[i,0,t]**2) for i in range(0,speed.shape[0])]
-    maxspeed = max(speeds)
-    cmap = matplotlib.cm.get_cmap('rainbow')
+    print(positions.shape) 
     def animate(t):
         #ax.clear()
         date = start + datetime.timedelta(days=t)

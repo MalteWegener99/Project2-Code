@@ -66,7 +66,6 @@ def load_clean_set(path):
     data[:,4] = ewe
     data[:,5] = nse
     data[:,6] = ude
-
     return outlierdet(data, 50, 20), baseline
 
 def to_fit(x, a, b, c, d):
@@ -76,7 +75,7 @@ def to_fit2(x, a, b, c, d, e):
     x = (x-a)/e
     return a*np.sin(b*x)*np.cos(np.sqrt(c*x))+d
 
-def predict_plot(dataw, baseline, data):
+def predict_plot(data, baseline):
 
     p0 = data[0,1:4]
     print(p0)
@@ -91,7 +90,7 @@ def predict_plot(dataw, baseline, data):
     plotpos = np.array([np.matmul(mat, llhtoxyz(data[i,1:4])-p0) for i in range(data.shape[0])])
 
     #make subseries for plotting
-    split = (datetime.date(2004,12,26)-baseline).days
+    split = 1000
     splitindex = 0
     for i in range(data.shape[0]):
         if data[i,0] < split:
