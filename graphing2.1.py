@@ -74,6 +74,10 @@ def to_fit2(x, a, b, c, d, e):
     x = (x-a)/e
     return a*np.sin(b*x)*np.cos(np.sqrt(c*x))+d
 
+def to_pred(x,a,b,d):
+
+    return a*np.log(x+b)+c*x + d
+
 def predict_plot(data, baseline, datao):
 
     p0 = data[0,1:4]
@@ -111,33 +115,38 @@ def predict_plot(data, baseline, datao):
         axarr[i].xaxis.set_major_formatter(yearsFmt)
         axarr[i].xaxis.set_minor_locator(months)
 
+    name = ["East","North","Up"]
     for i in range(0,2):
         predict = linregress(data[:splitindex,0], plotpos[:splitindex,i])
-        print("Before:", predict[0]*365*1000, "mm/yr")
-        predict2, away = 0,0#curve_fit(to_fit2, data[:splitindex,0], plotpos[:splitindex,i])
-        #print("After:", predict2[0]*365*1000, "mm/yr")
+        predict2,away = curve_fit(to_pred, data[splitindex+1:,0], plotpos[splitindex+1:,i])
+        #print(name[i], "Before:", predict[0]*365*1000 ,"mm/year",predict[-1]*1000,"mm")
+        st = "{}, before:{} $\pm${} mm/year" .format(name[i],round(predict[0]*365*1000,5),round(predict[-1]*1000*365,5))
+        st2 = "{}, after:{} $\pm${} mm/year" .format(name[i],round(predict2[1]*365*1000),round(np.sqrt(np.diag(away))[1]*1000*365,5))
         axarr[i].axhline(y=0, color='k')
         axarr[i].set_ylim([min(plotpos[:,i]), max(plotpos[:,i])])
         axarr[i].axvline(x=datetime.datetime(2004,12,26))
         #axarr[i].set_xlim([baseline, baseline+datetime.timedelta(days=data[i][-1,0])])
-        axarr[i].plot([baseline + datetime.timedelta(days=data[0,0]), baseline + datetime.timedelta(days=data[splitindex-1,0])], [predict[1], predict[1]+predict[0]*(data[splitindex-1,0]-data[0,0])], 'r--')
-        #axarr[i].plot([baseline + datetime.timedelta(days=x) for x in np.arange(data[splitindex+1,0], data[-1,0], 1)], [to_fit2(x, *predict2) for x in np.arange(data[splitindex+1,0], data[-1,0], 1)], 'r--')
+        axarr[i].plot([baseline + datetime.timedelta(days=data[0,0]), baseline + datetime.timedelta(days=data[splitindex-1,0])], [predict[1], predict[1]+predict[0]*(data[splitindex-1,0]-data[0,0])], 'r-',label = st)
+        axarr[i].plot([baseline + datetime.timedelta(days=x) for x in np.arange(data[splitindex+1,0], data[-1,0] + 5510, 1)], [to_pred(x, *predict2) for x in np.arange(data[splitindex+1,0], data[-1,0]+ 5510, 1)], 'r-',label =st2)
         axarr[i].errorbar([baseline + datetime.timedelta(days=x) for x in data[:,0]], plotpos[:,i], yerr=10*data[:, 4+i], fmt='x', elinewidth=0.1, markersize=0.5)
         #axarr[i].scatter([baseline + datetime.timedelta(days=x) for x in data[:,0]], plotpos[:,i], s=0.1)
-    
+        axarr[i].legend(loc = 3)
     for i in range(2,3):
         up, away = curve_fit(to_fit, data[:splitindex,0], plotpos[:splitindex,i])
-        print("before:",away)
+        #print(name[i],"before:",up[1]*365*1000,"mm/year",np.sqrt(np.diag(away))[1]*1000,"mm")
+        st = "{}, before:{} $\pm${} mm/year" .format(name[i],round(up[1]*365*1000,5),round(np.sqrt(np.diag(away))[1]*1000*365))
         up2, away = curve_fit(to_fit, data[splitindex+1:,0], plotpos[splitindex+1:,i])
-        print("after",up2)
+        #print(name[i],"after:",up2[1]*365*1000,"mm/year",np.sqrt(np.diag(away))[1]*1000,"mm")
+        st2 = "{}, after:{} $\pm${} mm/year" .format(name[i],round(up2[1]*365*1000),round(np.sqrt(np.diag(away))[1]*1000*365,5))
         axarr[i].axhline(y=0, color='k')
         axarr[i].set_ylim([min(plotpos[:,i]), max(plotpos[:,i])])
         axarr[i].axvline(x=datetime.datetime(2004,12,26))
         #axarr[].set_xlim([baseline, baseline+datetime.timedelta(days=data[i][-1,0])])
-        axarr[i].plot([baseline + datetime.timedelta(days=x) for x in np.arange(data[0,0], data[splitindex,0], 1)], [to_fit(x, *up) for x in np.arange(data[0,0], data[splitindex,0], 1)], 'r--')
-        axarr[i].plot([baseline + datetime.timedelta(days=x) for x in np.arange(data[splitindex+1,0], data[-1,0], 1)], [to_fit(x, *up2) for x in np.arange(data[splitindex+1,0], data[-1,0], 1)], 'r--')
+        axarr[i].plot([baseline + datetime.timedelta(days=x) for x in np.arange(data[0,0], data[splitindex,0], 1)], [to_fit(x, *up) for x in np.arange(data[0,0], data[splitindex,0], 1)], 'r-',label = st)
+        axarr[i].plot([baseline + datetime.timedelta(days=x) for x in np.arange(data[splitindex+1,0], data[-1,0], 1)], [to_fit(x, *up2) for x in np.arange(data[splitindex+1,0], data[-1,0], 1)], 'r-',label =st2)
         axarr[i].errorbar([baseline + datetime.timedelta(days=x) for x in data[:,0]], plotpos[:,i], yerr=10*data[:, 4+i], fmt='x', elinewidth=0.1, markersize=0.5)
-    
+        axarr[i].legend(loc = 3)
+
     plt.show()
 if __name__ == "__main__":
     predict_plot(*load_clean_set("conv/{}.tseries.neu".format(sys.argv[1])))

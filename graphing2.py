@@ -172,6 +172,7 @@ def predict_plot(data, baseline, datao):
         axarr[i,1].xaxis.set_major_formatter(yearsFmt)
         axarr[i,1].xaxis.set_minor_locator(months)
 
+    
     for i in range(0,2):
         predict = linregress(data[:splitindex,0], plotpos[:splitindex,i])
         print("Before:", predict[0]*365*1000, "mm/yr")
