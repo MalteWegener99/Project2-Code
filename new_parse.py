@@ -49,8 +49,6 @@ for i in range(len(lat_file)):
 	s_lon = float(lon_file[i].split()[2])
 	s_hei = float(rad_file[i].split()[2])
 
-	if i 
-
 	points.append(Sample_conv("PHUK", parse_date(dat), [lat,lon,hei], [s_lat,s_lon,s_hei]))
 
 
