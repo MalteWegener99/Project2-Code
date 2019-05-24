@@ -8,25 +8,25 @@ from geoplotlib.core import BatchPainter
 import glob, os, sys, csv, fnmatch
 from graphing import parse_binary_llh
 from math import degrees as deg
-import time
 import numpy as np
 
 #outlier func, n=800, sl=0.5
-def outlierdet(data,n,sl):
-	d = data[:,1]
-	avg_mask = np.ones(n)/n
-	d_ave = np.convolve(d,avg_mask,mode = "same")
-	diff = []
-	for j in range(n//2,len(data[:,1]) - n//2):
-		diff.append(abs(d_ave[j] - d[j]))
-	sdev = np.std(diff)
-	count = 0
-	for i in range(n//2,len(data[:,1]) - n//2):
-		if abs(d_ave[i] - d[i]) > (sl * sdev):
-			data = np.delete(data,(i - count), axis = 0)
-			count += 1
+def outlierdet(data,n,sl,On = True):
+    if On == True:
+        d = data[:,1]
+        avg_mask = np.ones(n)/n
+        d_ave = np.convolve(d,avg_mask,mode = "same")
+        diff = []
+        for j in range(n//2,len(data[:,1]) - n//2):
+            diff.append(abs(d_ave[j] - d[j]))
+        sdev = np.std(diff)
+        count = 0
+        for i in range(n//2,len(data[:,1]) - n//2):
+            if abs(d_ave[i] - d[i]) > (sl * sdev):
+                data = np.delete(data,(i - count), axis = 0)
+                count += 1
 
-	return data
+    return data
 
 def conv_data(data,n):
     conv_mat = np.ones(n)/n
@@ -52,35 +52,39 @@ for file in os.listdir():
             ComT = series[i].time
             Year = (ComT-(ComT%1000))/1000
             Day = ComT%1000
-            Year_len = 365*24*3600+6*3600
-            Day_len = 24*3600
+            Year_len = 365*24*3600 + 5*3600 + 48*60 + 46
+            Day_len = 23*3600 + 56*60 + 4
             Timestamp = int(((Year-1970)*Year_len) + (Day*Day_len))
             times.append(Timestamp)
             Lat_locations.append(deg(series[i].pos[0]))
             Lon_locations.append(deg(series[i].pos[1]))
 
         Lat_data = np.column_stack((times,Lat_locations))
-        Lat_newdata = outlierdet(Lat_data,1,10)  
+        Lat_newdata = outlierdet(Lat_data,100,1,False)  
         Lon_data = np.column_stack((times,Lon_locations))
-        Lon_newdata = outlierdet(Lon_data,1,10)
+        Lon_newdata = outlierdet(Lon_data,100,1,False)
 
         Det_Dat = []
         for Tstamp in range(len(Lat_newdata)):
             if Lat_newdata[Tstamp][0] in Lon_newdata:
                 Occ = np.where(Lon_newdata == Lat_newdata[Tstamp][0])[0][0]
                 Det_Dat.append([Lat_newdata[Tstamp][0],Lat_newdata[Tstamp][1],Lon_newdata[Occ][1]])  
-
-        for i in range(len(Det_Dat)-1):
+    
+        for i in range(len(Det_Dat)):
             if 1 <= Det_Dat[i][1] <= 9 and 95 <= Det_Dat[i][2] <= 110:
 
                 Timestamp = int(Det_Dat[i][0])
 
                 S_startlat = Det_Dat[i][1]
                 S_startlon = Det_Dat[i][2]
-                S_destilat = Det_Dat[i+1][1]
-                S_destilon = Det_Dat[i+1][2]
-                scaled_S_destilat = S_startlat + ((S_destilat-S_startlat))
-                scaled_S_destilon = S_startlon + ((S_destilon-S_startlon))
+                lat_L,lon_L = [],[]
+                for j in range(min(50, len(Det_Dat)-i-1)):
+                    lat_L.append(Det_Dat[i+j+1][1])
+                    lon_L.append(Det_Dat[i+j+1][2])
+                S_destilat = np.mean(lat_L)
+                S_destilon = np.mean(lon_L)
+                scaled_S_destilat = S_startlat + ((S_destilat-S_startlat)*5000000)
+                scaled_S_destilon = S_startlon + ((S_destilon-S_startlon)*5000000)
 
                 Locations.append([Sname,S_startlat,S_startlon,scaled_S_destilat,scaled_S_destilon,Timestamp])
 
@@ -118,7 +122,7 @@ class TrailsLayer(BaseLayer):
             x0, y0 = proj.lonlat_to_screen(grp['Slon'], grp['Slat'])
             x1, y1 = proj.lonlat_to_screen(grp['Flon'], grp['Flat'])
             self.painter.points(x0, y0, 3)
-            self.painter.lines(x0,y0,x1,y1,width=3)
+            self.painter.lines(x0,y0,x1,y1,width=2)
 
         self.t += 24*3600 #set animation step size
 

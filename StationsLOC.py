@@ -6,6 +6,8 @@ from geoplotlib.utils import epoch_to_str, BoundingBox, read_csv
 import glob, os, sys, csv, fnmatch
 from graphing import parse_binary_llh
 from math import degrees as deg
+import numpy as np
+import pandas as pd
 
 #path to converted files
 path = os.path.dirname(os.path.realpath(__file__))+'/conv'
@@ -21,8 +23,14 @@ for file in os.listdir():
         #convert list with [phi, lambda, h] to [name, lat, lon]
         Locations.append([Sname,deg(series[0].pos[0]),deg(series[0].pos[1])])
 
-#path to SLOCs.csv
+#path to SLOCs.csv and coordinates.txt
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
+
+#get locations of added stations
+lines = open("coordinates.txt").readlines()[2:]
+for line in lines:
+        split = line.split()
+        Locations.append([split[0],float(split[2]),float(split[1])])
 
 #empty SLOCs.csv
 f = open("SLOCs.csv", "w+")
@@ -35,15 +43,20 @@ with open('SLOCs.csv', mode='w', newline='') as SLOCs:
     for station in Locations:
         SLOCs.writerow([station[0], station[1], station[2]])
 
-#plot stations
+#plot stations & earthquakes
 Plotdata = read_csv('SLOCs.csv')
-gp.set_bbox(BoundingBox(north=9, west=110, south=1, east=95))
-gp.dot(Plotdata, color='red', point_size=2)
-gp.labels(Plotdata, 'name', color='black', font_size=8, anchor_x='center')
+Earthquakes = read_csv('earthquakes.csv')
+Mags = np.genfromtxt("earthquakes.csv",skip_header=1,delimiter=',')[:,-3]
+gp.set_bbox(BoundingBox(north=21, west=115, south=-2, east=90))
+gp.dot(Plotdata, color='blue', point_size=3.5)
+#gp.labels(Plotdata, 'name', color='black', font_size=8, anchor_x='center')
 gp.tiles_provider('positron')
 
-gp.show()
+#Plot earthquake heatmap
+gp.kde(Earthquakes, bw=4.5, cut_below=1e-4)
+gp.set_smoothing(True)
 
+gp.show()
 
 'https://maps-for-free.com/layer/relief/z{Z}/row{Y}/{Z}_{X}-{Y}.jpg'
 #ToDo: change tile to map from the web (url above)
