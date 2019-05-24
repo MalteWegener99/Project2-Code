@@ -24,13 +24,17 @@ def parse_date(string):
         "NOV": 11,
         "DEC": 12,
     }
+    print(year)
+
     year = int(year)
     if year > 20:
         year += 1900
     else:
         year += 2000
     day = int(day)
-    return datetime.datetime(year, monthtonum[month], day)
+    return datetime.datetime(year, monthtonum[month.upper()], day)
+    print("month")
+
 
 
 lat_file = open("newthing/{}.lat".format(sys.argv[1])).readlines()
@@ -51,11 +55,6 @@ for i in range(len(lat_file)):
    
     #Offset correction
    
-    if i > 398: 
-        lat = lat - 8.39
-        lon = lon - 11.77
-        hei = hei + 0.06
-    
 
     points.append(Sample_conv("PHUK", parse_date(dat), [lat,lon,hei], [s_lat,s_lon,s_hei]))
 
@@ -67,10 +66,21 @@ months = mdates.MonthLocator()  # every month
 yearsFmt = mdates.DateFormatter('%Y')	
 print(type(points[0].time))
 
+def to_fit(x, a, b, c, d):
+    return a + b*x + c*np.sin(2*math.pi/365 * x + d)
+
+def to_fit2(x, a, b, c, d):
+    return a/(x-d)+b*x + c
+
+ne = curve_fit(to_fit2, data[splitindex:,0], plotpos[splitindex:,0])[0]
+ew = curve_fit(to_fit2, data[splitindex:,0], plotpos[splitindex:,1])[0]
+
+
 for i in range(3):
     predict = linregress([(x.time-points[0].time).days for x in points], [x.pos[i] for x in points])
     axarr[i].axhline(y=0, color='k')
     axarr[i].set_xlim([min([x.time for x in points]), max([x.time for x in points])])
+    axarr[i].plot([baseline + datetime.timedelta(days=x) for x in np.arange(data[splitindex+1,0], data[-1,0], 1)], [to_fit2(x, *predict2) for x in np.arange(data[splitindex+1,0], data[-1,0], 1)], 'r--')
     axarr[i].errorbar([x.time for x in points], [x.pos[i] for x in points], yerr=[x.err[i] for x in points], fmt='x', elinewidth=0.1, markersize=0.55)
     axarr[i].plot([points[0].time, points[-1].time], [predict[1], predict[1]+predict[0]*(points[-1].time-points[0].time).days])
 plt.show()
