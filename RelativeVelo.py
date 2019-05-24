@@ -154,9 +154,9 @@ def plot_rel(s_name):
 
 
 """MAIN CODE"""
-fname = 'conv\SLOCs.csv'
-s_name = 'BAKO'
-#Trans_Velo_csv(fname)
+fname = 'SLOCs.csv'
+s_name = str(sys.argv[1])
+#print(Trans_Velo_csv(fname))
 #Trans_Avg_Velo_csv()
 #Rel_Vel()
 plot_rel(s_name)
