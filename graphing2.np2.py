@@ -78,7 +78,7 @@ pr = []
 for i in range(1140):
 	pr.append(datetime.datetime(2018,12,29)+datetime.timedelta(days = 10*i))
 print(datetime.datetime(2018,12,29)+datetime.timedelta(days = 10*5))
-print(pr[1])
+print(pr[-1])
 name = ["East","North","Up"]
 for i in range(2):
 	predict = linregress([(x.time-points[0].time).days for x in points[:splitindex+1]], [x.pos[i] for x in points[:splitindex+1]])
@@ -87,7 +87,7 @@ for i in range(2):
     #st2 = "{}, after:{} $\pm${} mm/year" .format(name[i],round(p[1]*365,5),round(np.sqrt(np.diag(cov))[1]*365,5))
 	axarr[i].axvline(x=datetime.datetime(2004,12,26))
 	axarr[i].axhline(y=0, color='k')
-	axarr[i].set_xlim([min([x.time for x in points]), max([x.time for x in points])])
+	axarr[i].set_xlim([min([x.time for x in points]), datetime.datetime(2050,1,1)])
 	axarr[i].errorbar([x.time for x in points], [x.pos[i] for x in points], yerr=[x.err[i] for x in points], fmt='x', elinewidth=0.1, markersize=0.55)
 	#axarr[i].plot([points[0].time, points[-1].time], [predict[1], predict[1]+predict[0]*(points[-1].time-points[0].time).days])
 	axarr[i].set_ylabel("Deformation [mm]")
@@ -104,12 +104,13 @@ for i in range(2,3):
 	#print(name[i],"after:",up2[1]*365*1000,"mm/year",np.sqrt(np.diag(away))[1]*1000,"mm")
 	st2 = "{}, after:{} $\pm${} mm/year" .format(name[i],round(up2[1]*365),round(np.sqrt(np.diag(away))[1]*365,5))
 	axarr[i].axhline(y=0, color='k')
-	axarr[i].set_xlim([min([x.time for x in points]), max([x.time for x in points])])
+	axarr[i].set_xlim([min([x.time for x in points]), datetime.datetime(2050,1,1)])
 	axarr[i].axvline(x=datetime.datetime(2004,12,26))
 	axarr[i].set_ylabel("Deformation [mm]")
 	#axarr[].set_xlim([baseline, baseline+datetime.timedelta(days=data[i][-1,0])])
 	axarr[i].plot([x.time for x in points[:splitindex+1]], [to_fit((x.time-points[0].time).days, *up) for x in points[:splitindex+1]],label = st)
 	axarr[i].plot([x.time for x in points[splitindex+1:]], [to_fit((x.time-points[0].time).days, *up2) for x in points[splitindex+1:]],label = st2)
 	axarr[i].errorbar([x.time for x in points], [x.pos[i] for x in points], yerr=[x.err[i] for x in points], fmt='x', elinewidth=0.1, markersize=0.55)
+	axarr[i].plot([x for x in pr], [to_fit((x-points[0].time).days, *up2) for x in pr], "b--")
 	axarr[i].legend(loc = 3)
 plt.show()
