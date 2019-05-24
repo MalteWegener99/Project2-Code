@@ -49,14 +49,13 @@ for i in range(len(lat_file)):
 	s_lon = float(lon_file[i].split()[2])
 	s_hei = float(rad_file[i].split()[2])
 
-	points.append(Sample_conv("PHUK", parse_date(dat), [lat,lon,hei], [s_lat,s_lon,s_hei]))
-
+	points.append(Sample_conv(sys.argv[1], parse_date(dat), [lat,lon,hei], [s_lat,s_lon,s_hei]))
 
 f, axarr = plt.subplots(3, sharex=True)
 
 years = mdates.YearLocator()   # every year
 months = mdates.MonthLocator()  # every month
-yearsFmt = mdates.DateFormatter('%Y')	
+yearsFmt = mdates.DateFormatter('%Y')
 print(type(points[0].time))
 
 for i in range(3):
