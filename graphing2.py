@@ -66,7 +66,7 @@ def load_clean_set(path):
     data[:,4] = ewe
     data[:,5] = nse
     data[:,6] = ude
-    return outlierdet(data, 50, 20), baseline
+    return outlierdet(data, 50, 20), baseline, data
 
 def to_fit(x, a, b, c, d):
     return a + b*x + c*np.sin(2*math.pi/365 * x + d)
@@ -74,7 +74,7 @@ def to_fit(x, a, b, c, d):
 def to_fit2(x, a, b, c, d):
     return a/(x-d)+b*x + c
 
-def predict_plot(data, baseline):
+def predict_plot(data, baseline, datao):
 
     p0 = data[0,1:4]
     print(p0)
@@ -85,7 +85,7 @@ def predict_plot(data, baseline):
         [-1*cos(phi)*sin(lam), -1*sin(phi)*sin(lam), cos(lam)],
         [cos(phi)*cos(lam), sin(phi)*cos(lam), sin(lam)]
     ])
-    f, axarr = plt.subplots(3, sharex=True)
+    f, axarr = plt.subplots(3,2, sharex=True)
     plotpos = np.array([np.matmul(mat, llhtoxyz(data[i,1:4])-p0) for i in range(data.shape[0])])
 
     #make subseries for plotting
@@ -106,18 +106,18 @@ def predict_plot(data, baseline):
     # plt.show()
     # Plotting of the actual stuff
     f.suptitle(sys.argv[1])
-    axarr[0].set_title("East [m]")
-    axarr[1].set_title("North [m]")
-    axarr[2].set_title("Up [m]")
+    axarr[0,0].set_title("East [m]")
+    axarr[1,0].set_title("North [m]")
+    axarr[2,0].set_title("Up [m]")
 
     years = mdates.YearLocator()   # every year
     months = mdates.MonthLocator()  # every month
     yearsFmt = mdates.DateFormatter('%Y')
 
     for i in range(3):
-        axarr[i].xaxis.set_major_locator(years)
-        axarr[i].xaxis.set_major_formatter(yearsFmt)
-        axarr[i].xaxis.set_minor_locator(months)
+        axarr[i,0].xaxis.set_major_locator(years)
+        axarr[i,0].xaxis.set_major_formatter(yearsFmt)
+        axarr[i,0].xaxis.set_minor_locator(months)
 
     name = ["North", "East", "Up"]
 
@@ -144,10 +144,71 @@ def predict_plot(data, baseline):
         axarr[i].set_ylim([min(plotpos[:,i]), max(plotpos[:,i])])
         axarr[i].axvline(x=datetime.datetime(2004,12,26))
         #axarr[i].set_xlim([baseline, baseline+datetime.timedelta(days=data[i][-1,0])])
-        axarr[i].plot([baseline + datetime.timedelta(days=x) for x in np.arange(data[0,0], data[splitindex,0], 1)], [to_fit(x, *up) for x in np.arange(data[0,0], data[splitindex,0], 1)], 'r--')
-        axarr[i].plot([baseline + datetime.timedelta(days=x) for x in np.arange(data[splitindex+1,0], data[-1,0], 1)], [to_fit(x, *up2) for x in np.arange(data[splitindex+1,0], data[-1,0], 1)], 'r--')
-        axarr[i].errorbar([baseline + datetime.timedelta(days=x) for x in data[:,0]], plotpos[:,i], yerr=10*data[:, 4+i], fmt='x', elinewidth=0.1, markersize=0.5)
+        axarr[i,0].plot([baseline + datetime.timedelta(days=x) for x in np.arange(data[0,0], data[splitindex,0], 1)], [to_fit(x, *up) for x in np.arange(data[0,0], data[splitindex,0], 1)], 'r--')
+        axarr[i,0].plot([baseline + datetime.timedelta(days=x) for x in np.arange(data[splitindex+1,0], data[-1,0], 1)], [to_fit(x, *up2) for x in np.arange(data[splitindex+1,0], data[-1,0], 1)], 'r--')
+        axarr[i,0].errorbar([baseline + datetime.timedelta(days=x) for x in data[:,0]], plotpos[:,i], yerr=10*data[:, 4+i], fmt='x', elinewidth=0.1, markersize=0.5)
+    
+    
+    data = datao
+    p0 = data[0,1:4]
+    print(p0)
+    lam, phi, h = p0
+    p0 = llhtoxyz(p0)
+    mat = np.array([
+        [-1*sin(phi), cos(phi), 0],
+        [-1*cos(phi)*sin(lam), -1*sin(phi)*sin(lam), cos(lam)],
+        [cos(phi)*cos(lam), sin(phi)*cos(lam), sin(lam)]
+    ])
+    plotpos = np.array([np.matmul(mat, llhtoxyz(data[i,1:4])-p0) for i in range(data.shape[0])])
 
+    #make subseries for plotting
+    split = (datetime.date(2004,12,26)-baseline).days
+    splitindex = 0
+    for i in range(data.shape[0]):
+        if data[i,0] < split:
+            splitindex = i
+        else:
+            break
+    # Plotting of the actual stuff
+    f.suptitle(sys.argv[1])
+    axarr[0,1].set_title("East [m]")
+    axarr[1,1].set_title("North [m]")
+    axarr[2,1].set_title("Up [m]")
+
+    years = mdates.YearLocator()   # every year
+    months = mdates.MonthLocator()  # every month
+    yearsFmt = mdates.DateFormatter('%Y')
+
+    for i in range(3):
+        axarr[i,1].xaxis.set_major_locator(years)
+        axarr[i,1].xaxis.set_major_formatter(yearsFmt)
+        axarr[i,1].xaxis.set_minor_locator(months)
+
+    
+    for i in range(0,2):
+        predict = linregress(data[:splitindex,0], plotpos[:splitindex,i])
+        print("Before:", predict[0]*365*1000, "mm/yr")
+        predict2, away = 0,0#curve_fit(to_fit2, data[:splitindex,0], plotpos[:splitindex,i])
+        #print("After:", predict2[0]*365*1000, "mm/yr")
+        axarr[i,1].axhline(y=0, color='k')
+        axarr[i,1].set_ylim([min(plotpos[:,i]), max(plotpos[:,i])])
+        axarr[i,1].axvline(x=datetime.datetime(2004,12,26))
+        #axarr[i].set_xlim([baseline, baseline+datetime.timedelta(days=data[i][-1,0])])
+        axarr[i,1].plot([baseline + datetime.timedelta(days=data[0,0]), baseline + datetime.timedelta(days=data[splitindex-1,0])], [predict[1], predict[1]+predict[0]*(data[splitindex-1,0]-data[0,0])], 'r--')
+        #axarr[i].plot([baseline + datetime.timedelta(days=x) for x in np.arange(data[splitindex+1,0], data[-1,0], 1)], [to_fit2(x, *predict2) for x in np.arange(data[splitindex+1,0], data[-1,0], 1)], 'r--')
+        axarr[i,1].errorbar([baseline + datetime.timedelta(days=x) for x in data[:,0]], plotpos[:,i], yerr=10*data[:, 4+i], fmt='x', elinewidth=0.1, markersize=0.5)
+        #axarr[i].scatter([baseline + datetime.timedelta(days=x) for x in data[:,0]], plotpos[:,i], s=0.1)
+    
+    for i in range(2,3):
+        up, away = curve_fit(to_fit, data[:splitindex,0], plotpos[:splitindex,i])
+        up2, away = curve_fit(to_fit, data[splitindex+1:,0], plotpos[splitindex+1:,i])
+        axarr[i,1].axhline(y=0, color='k')
+        axarr[i,1].set_ylim([min(plotpos[:,i]), max(plotpos[:,i])])
+        axarr[i,1].axvline(x=datetime.datetime(2004,12,26))
+        #axarr[i].set_xlim([baseline, baseline+datetime.timedelta(days=data[i][-1,0])])
+        axarr[i,1].plot([baseline + datetime.timedelta(days=x) for x in np.arange(data[0,0], data[splitindex,0], 1)], [to_fit(x, *up) for x in np.arange(data[0,0], data[splitindex,0], 1)], 'r--')
+        axarr[i,1].plot([baseline + datetime.timedelta(days=x) for x in np.arange(data[splitindex+1,0], data[-1,0], 1)], [to_fit(x, *up2) for x in np.arange(data[splitindex+1,0], data[-1,0], 1)], 'r--')
+        axarr[i,1].errorbar([baseline + datetime.timedelta(days=x) for x in data[:,0]], plotpos[:,i], yerr=10*data[:, 4+i], fmt='x', elinewidth=0.1, markersize=0.5)
     plt.show()
 
 

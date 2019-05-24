@@ -150,6 +150,18 @@ def plot_rel(s_name):
     ax.fmt_xdata = mdates.DateFormatter('%Y-%m-%d')
     ax2.fmt_xdata = mdates.DateFormatter('%Y-%m-%d')
     plt.title('Relative displacement per unit time')
+
+    years = mdates.YearLocator()   # every year
+    months = mdates.MonthLocator()  # every month
+    yearsFmt = mdates.DateFormatter('%Y')
+
+    
+    ax.xaxis.set_major_locator(years)
+    ax.xaxis.set_major_formatter(yearsFmt)
+    ax.xaxis.set_minor_locator(months)
+    ax2.xaxis.set_major_locator(years)
+    ax2.xaxis.set_major_formatter(yearsFmt)
+    ax2.xaxis.set_minor_locator(months)
     plt.show()
 
 

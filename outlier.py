@@ -7,12 +7,48 @@ import os
 from matplotlib import pyplot as plt
 from math import degrees as deg
 from sklearn.cluster import AffinityPropagation
-from graphing import parse_binary_llh
+from sklearn.covariance import EllipticEnvelope
+
 
 
 
 
 def outlierdet(data,n,sl):
+
+    dx = data[:,1]
+    dy = data[:,2]
+    dz = data[:,3]
+
+    avg_mask = np.ones(n)/n
+
+    d_ave_x = np.convolve(dx,avg_mask,mode = "same")
+    d_ave_y = np.convolve(dy,avg_mask,mode = "same")
+    d_ave_z = np.convolve(dz,avg_mask,mode = "same")
+
+    diffx = []
+    diffy = []
+    diffz = []
+
+    for j in range(n//2,len(data[:,1]) - n//2):
+        diffx.append(abs(d_ave_x[j] - dx[j]))
+        diffy.append(abs(d_ave_y[j] - dy[j]))
+        diffz.append(abs(d_ave_z[j] - dz[j]))
+    
+    sdevx = np.std(diffx)
+    sdevy = np.std(diffy)
+    sdevz = np.std(diffz)
+
+    count = 0
+
+    for i in range(n//2,len(data[:,1]) - n//2):
+        bool_x = (abs(d_ave_x[i] - dx[i]) > (sl * sdevx))
+        bool_y = (abs(d_ave_y[i] - dy[i]) > (sl * sdevy))
+        bool_z = (abs(d_ave_z[i] - dz[i]) > (sl * sdevz))
+
+        if bool_x or bool_y or bool_z:
+            data = np.delete(data,(i - count), axis = 0)
+            count += 1
+
     '''Recommended Inputs: n = 50, sl = 0.75'''
     for col in range(1,len(data[0,:])):
         print(col)
@@ -88,3 +124,16 @@ if __name__ == "__main__":
 
     # plt.autoscale(enable=True,axis = "y",tight=True)
     plt.show()
+
+    d = data[:,1]
+    avg_mask = np.ones(n)/n
+    d_ave = np.convolve(d,avg_mask,mode = "same")
+    diff = []
+    for j in range(n//2,len(data[:,1]) - n//2):
+        diff.append(abs(d_ave[j] - d[j]))
+    sdev = np.std(diff)
+    count = 0
+    for i in range(n//2,len(data[:,1]) - n//2):
+        if abs(d_ave[i] - d[i]) > (sl * sdev):
+            data = np.delete(data,(i - count), axis = 0)
+            count += 1
