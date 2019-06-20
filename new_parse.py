@@ -4,6 +4,12 @@ import matplotlib.pyplot as plt
 import sys
 import matplotlib.dates as mdates
 from scipy.stats import linregress
+from scipy.optimize import curve_fit
+import numpy as np
+
+def to_fit2(x, a, c, d, t, b, poop):
+    print(b)
+    return a + b*x + -1*c*np.log(1+(x-poop)/t)
 
 def parse_date(string):
 	year = string[-2:]
@@ -50,17 +56,29 @@ for i in range(len(lat_file)):
 
 	points.append(Sample_conv(sys.argv[1], parse_date(dat), [lat,lon,hei], [s_lat,s_lon,s_hei]))
 
-f, axarr = plt.subplots(3, sharex=True)
-
 years = mdates.YearLocator()   # every year
 months = mdates.MonthLocator()  # every month
 yearsFmt = mdates.DateFormatter('%Y')
 print(type(points[0].time))
 
-for i in range(3):
-	predict = linregress([(x.time-points[0].time).days for x in points], [x.pos[i] for x in points])
-	axarr[i].axhline(y=0, color='k')
-	axarr[i].set_xlim([min([x.time for x in points]), max([x.time for x in points])])
-	axarr[i].errorbar([x.time for x in points], [x.pos[i] for x in points], yerr=[x.err[i] for x in points], fmt='x', elinewidth=0.1, markersize=0.55)
-	axarr[i].plot([points[0].time, points[-1].time], [predict[1], predict[1]+predict[0]*(points[-1].time-points[0].time).days])
+split = datetime.datetime(2004,12,26)
+splitindex = 0
+for i in range(len(points)):
+    if points[i].time < split:
+        splitindex = i
+    else:
+        break
+splitindex += 40
+baseline = points[0].time
+fittime = [(x.time - points[0].time).days for x in points[splitindex:]]
+fitdata = np.array([points[i].pos[1] for i in range(splitindex, len(points))])
+pretime = [(x.time - points[0].time).days for x in points[:splitindex]]
+predata = np.array([points[i].pos[1] for i in range(splitindex)])
+
+pretimespeed = linregress(pretime, predata)[0]
+
+print(pretimespeed)
+to_fit2_real = lambda x, a, c, d, t: to_fit2(x, a, c, d, t, pretimespeed, splitindex-40)
+#fitted = curve_fit(to_fit2_real, fittime, fitdata)[0]
+plt.scatter(fittime, fitdata)
 plt.show()

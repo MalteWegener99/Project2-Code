@@ -155,8 +155,8 @@ def analyse(file_name):
         plt.grid()
         plt.triplot(np.rad2deg(positions[:,1,t]),np.rad2deg(positions[:,0,t]),simplices, linewidth=1.0)
         plt.triplot(np.rad2deg(vertices[:,1]),np.rad2deg(vertices[:,0]),simplices, linewidth=0.5)
-        plt.xlabel("Longitude")
-        plt.ylabel("Latitude")
+        plt.xlabel("Longitude [degrees]")
+        plt.ylabel("Latitude [degrees]")
         print(speed[0,1,t], speed[0,0,t])
         for i in range(0,speed.shape[0]):
             mag = sqrt(speed[i,1,t]**2 + speed[i,0,t]**2)
@@ -166,7 +166,7 @@ def analyse(file_name):
 
     #ani = animation.FuncAnimation(fig, animate, frames=range(1,rng-10,7), interval=100, save_count=500, blit=False)
     print(start)
-    animate(50+28+91-91)
+    animate(50+28+91)#-91)
     #ani.save("move.mp4")
     plt.show()
         
